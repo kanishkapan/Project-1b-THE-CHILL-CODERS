@@ -235,19 +235,30 @@ class DocumentProcessor:
         """
         sections = []
         
-        # Common heading patterns
+        # Enhanced heading patterns for Adobe Acrobat documentation
         heading_patterns = [
-            r'^([A-Z][A-Z\s]{2,50})\n',  # ALL CAPS headings
-            r'^\d+\.?\s+([A-Z][^.!?\n]{5,80})\n',  # Numbered headings
-            r'^([A-Z][a-z\s]{3,50})(?:\n|$)',  # Title case headings
+            # Adobe-specific patterns
+            r'^([A-Z][a-z]+(?:\s+[a-z]+)*\s+(?:forms?|PDFs?|documents?|signatures?)\s+[a-z\s]*(?:\([^)]+\))?)\s*$',  # "Change flat forms to fillable (Acrobat Pro)"
+            r'^([A-Z][a-z]+\s+(?:multiple\s+)?PDFs?\s+[a-z\s]+)\s*$',  # "Create multiple PDFs from multiple files"
+            r'^([A-Z][a-z]+\s+(?:and\s+)?[a-z]+\s+PDF\s+[a-z]+)\s*$',  # "Fill and sign PDF forms"
+            r'^([A-Z][a-z]+\s+[a-z]+\s+(?:content\s+)?to\s+PDF)\s*$',  # "Convert clipboard content to PDF"
+            r'^([A-Z][a-z]+\s+a\s+document\s+[a-z\s]+)\s*$',  # "Send a document to get signatures"
+            
+            # General patterns (existing)
+            r'^([A-Z][A-Z\s]{2,50})\s*$',  # ALL CAPS headings
+            r'^\d+\.?\s+([A-Z][^.!?\n]{5,80})\s*$',  # Numbered headings
+            r'^([A-Z][a-z\s]{3,50})(?:\s*$)',  # Title case headings
             r'^\s*([A-Z][A-Z\s\-]{3,50})\s*$',  # Centered headings
+            
+            # Adobe procedure patterns
+            r'^((?:To\s+)?[A-Z][a-z]+(?:\s+[a-z]+)*:?).*$',  # "To create...", "To fill..."
         ]
         
         text_lines = text.split('\n')
         
         for i, line in enumerate(text_lines):
             line = line.strip()
-            if not line:
+            if not line or len(line) < 10:  # Skip very short lines
                 continue
                 
             for pattern in heading_patterns:
@@ -255,24 +266,56 @@ class DocumentProcessor:
                 if match:
                     heading_text = match.group(1).strip()
                     
-                    # Extract following content (next 500 chars)
-                    start_idx = text.find(line)
-                    if start_idx != -1:
-                        content_start = start_idx + len(line)
-                        content = text[content_start:content_start + 500].strip()
-                    else:
-                        content = ""
-                    
-                    sections.append({
-                        'title': heading_text,
-                        'content_preview': content,
-                        'line_number': i + 1,
-                        'type': 'heading'
-                    })
-                    break
+                    # Filter out false positives
+                    if self._is_valid_heading(heading_text, line):
+                        # Extract following content (next 500 chars)
+                        start_idx = text.find(line)
+                        if start_idx != -1:
+                            content_start = start_idx + len(line)
+                            content = text[content_start:content_start + 500].strip()
+                        else:
+                            content = ""
+                        
+                        sections.append({
+                            'title': heading_text,
+                            'content_preview': content,
+                            'line_number': i + 1,
+                            'type': 'heading'
+                        })
+                        break
         
         return sections
     
+    def _is_valid_heading(self, heading_text: str, full_line: str) -> bool:
+        """Check if extracted text is a valid heading."""
+        # Filter out common false positives
+        invalid_patterns = [
+            r'^\d+\s*$',  # Just numbers
+            r'^[A-Z]\s*$',  # Single letters
+            r'^(and|or|the|of|in|on|at|to|for|with|by)\s',  # Starting with common words
+            r'^\w+@\w+',  # Email addresses
+            r'^https?://',  # URLs
+        ]
+        
+        heading_lower = heading_text.lower()
+        
+        for pattern in invalid_patterns:
+            if re.match(pattern, heading_lower):
+                return False
+        
+        # Check for Adobe-specific keywords that indicate good headings
+        adobe_keywords = [
+            'form', 'pdf', 'acrobat', 'sign', 'signature', 'create', 'convert', 
+            'export', 'edit', 'share', 'fill', 'document', 'interactive', 'fields'
+        ]
+        
+        # If it contains Adobe keywords, it's likely a good heading
+        if any(keyword in heading_lower for keyword in adobe_keywords):
+            return True
+        
+        # General validation - should be reasonable length and format
+        return 5 <= len(heading_text) <= 100 and not heading_text.endswith('.')
+        
     def _has_tables(self, page) -> bool:
         """Check if page contains tables."""
         try:

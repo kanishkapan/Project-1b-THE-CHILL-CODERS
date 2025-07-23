@@ -30,7 +30,7 @@ def main():
     parser.add_argument('--input_json', help='JSON input file with challenge info')
     parser.add_argument('--output_dir', default='./output', help='Output directory for results')
     parser.add_argument('--output_file', default='results.json', help='Output JSON filename')
-    parser.add_argument('--max_documents', type=int, default=10, help='Maximum number of documents to process')
+    parser.add_argument('--max_documents', type=int, default=50, help='Maximum number of documents to process')
     
     args = parser.parse_args()
     
