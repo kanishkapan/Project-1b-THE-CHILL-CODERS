@@ -50,7 +50,8 @@ class PersonaAnalyzer:
             'business': ['revenue', 'strategy', 'market', 'performance', 'growth', 'analysis', 'trends'],
             'education': ['concepts', 'principles', 'examples', 'exercises', 'theory', 'practice', 'learning'],
             'technical': ['implementation', 'architecture', 'specifications', 'documentation', 'procedures'],
-            'finance': ['financial', 'investment', 'returns', 'risk', 'portfolio', 'market', 'analysis']
+            'finance': ['financial', 'investment', 'returns', 'risk', 'portfolio', 'market', 'analysis'],
+            'food': ['vegetarian', 'vegan', 'gluten-free', 'ingredients', 'recipe', 'menu', 'buffet', 'dinner', 'cooking', 'preparation', 'dietary', 'nutrition', 'catering', 'corporate', 'gathering']
         }
         
         # Job intent patterns
@@ -164,7 +165,8 @@ class PersonaAnalyzer:
             'education': ['education', 'student', 'learning', 'academic', 'school', 'university'],
             'technical': ['technical', 'engineering', 'software', 'computer', 'technology'],
             'medical': ['medical', 'healthcare', 'clinical', 'pharmaceutical', 'biology'],
-            'finance': ['finance', 'banking', 'investment', 'economic', 'financial']
+            'finance': ['finance', 'banking', 'investment', 'economic', 'financial'],
+            'food': ['food', 'culinary', 'chef', 'cooking', 'catering', 'contractor', 'menu', 'restaurant', 'kitchen', 'recipe']
         }
         
         persona_lower = persona.lower()

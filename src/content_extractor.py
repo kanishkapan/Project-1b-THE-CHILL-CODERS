@@ -39,7 +39,7 @@ class ContentExtractor:
         """Initialize the content extractor."""
         self.min_section_length = 100  # Minimum characters for a section
         self.max_section_length = 2000  # Maximum characters to extract per section
-        self.min_relevance_threshold = 0.1  # Minimum relevance score to include
+        self.min_relevance_threshold = 0.01  # Minimum relevance score to include
         
         # Section type patterns
         self.section_patterns = {
