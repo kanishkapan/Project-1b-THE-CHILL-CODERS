@@ -1,0 +1,33 @@
+# CPU-optimized Dockerfile for Adobe Hackathon
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install system dependencies for PDF processing
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements first for better caching
+COPY requirements-cpu.txt .
+
+# Install Python dependencies (CPU only for speed)
+RUN pip install --no-cache-dir -r requirements-cpu.txt
+
+# Download spaCy model
+RUN python -m spacy download en_core_web_sm
+
+# Copy application code
+COPY . .
+
+# Create necessary directories
+RUN mkdir -p /app/documents /app/output
+
+# Set default environment variables for hackathon constraints
+ENV PYTHONPATH=/app
+ENV TORCH_CUDA_ARCH_LIST=""
+ENV CUDA_VISIBLE_DEVICES=""
+
+# Default command
+CMD ["python", "main.py", "--documents_dir", "/app/documents", "--output_dir", "/app/output", "--persona", "Research Analyst", "--job", "Extract key insights and methodologies"]
