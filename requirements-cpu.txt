@@ -12,6 +12,9 @@ numpy>=1.24.0
 # CPU-only PyTorch
 torch>=2.0.0,<2.1.0 --index-url https://download.pytorch.org/whl/cpu
 
+# Lightweight sentence transformers (CPU optimized)
+sentence-transformers>=2.2.0
+
 # Minimal NLP processing
 spacy>=3.7.0
 

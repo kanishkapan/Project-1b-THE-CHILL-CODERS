@@ -1,0 +1,49 @@
+{
+    "challenge_info": {
+        "challenge_id": "your_test_case_id",
+        "test_case_name": "your_test_name",
+        "description": "Description of your test case"
+    },
+    "documents": [
+        {
+            "filename": "your_pdf_1.pdf",
+            "title": "Your PDF 1 Title"
+        },
+        {
+            "filename": "your_pdf_2.pdf", 
+            "title": "Your PDF 2 Title"
+        }
+    ],
+    "persona": {
+        "role": "Your Persona Role (e.g., Research Scientist, Business Analyst, Student)",
+        "expertise": [
+            "Expertise Area 1",
+            "Expertise Area 2",
+            "Expertise Area 3"
+        ],
+        "responsibilities": [
+            "Responsibility 1",
+            "Responsibility 2", 
+            "Responsibility 3"
+        ]
+    },
+    "job_to_be_done": {
+        "task": "Detailed description of what the persona needs to accomplish",
+        "context": "Context for the task",
+        "deliverables": [
+            "Expected deliverable 1",
+            "Expected deliverable 2"
+        ],
+        "priority_focus": [
+            "Priority focus area 1",
+            "Priority focus area 2"
+        ]
+    },
+    "expected_sections": [
+        "Expected Section Title 1",
+        "Expected Section Title 2", 
+        "Expected Section Title 3",
+        "Expected Section Title 4",
+        "Expected Section Title 5"
+    ]
+}

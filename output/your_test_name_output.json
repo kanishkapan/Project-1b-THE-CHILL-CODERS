@@ -1,0 +1,83 @@
+{
+  "metadata": {
+    "input_documents": [
+      "Learn Acrobat - Create and Convert_1.pdf",
+      "Learn Acrobat - Create and Convert_2.pdf",
+      "Learn Acrobat - Edit_1.pdf",
+      "Learn Acrobat - Edit_2.pdf",
+      "Learn Acrobat - Export_1.pdf",
+      "Learn Acrobat - Export_2.pdf",
+      "Learn Acrobat - Fill and Sign.pdf",
+      "Learn Acrobat - Generative AI_1.pdf",
+      "Learn Acrobat - Generative AI_2.pdf",
+      "Learn Acrobat - Request e-signatures_1.pdf",
+      "Learn Acrobat - Request e-signatures_2.pdf",
+      "Learn Acrobat - Share_1.pdf",
+      "Learn Acrobat - Share_2.pdf",
+      "Test Your Acrobat Exporting Skills.pdf",
+      "The Ultimate PDF Sharing Checklist.pdf"
+    ],
+    "persona": "Your Persona Role (e.g., Research Scientist, Business Analyst, Student)",
+    "job_to_be_done": "Detailed description of what the persona needs to accomplish",
+    "processing_timestamp": "2025-07-24T18:23:25.884084+00:00"
+  },
+  "extracted_sections": [
+    {
+      "document": "Learn Acrobat - Create and Convert_1.pdf",
+      "section_title": "Create multiple PDFs from multiple files",
+      "importance_rank": 1,
+      "page_number": 12
+    },
+    {
+      "document": "Learn Acrobat - Request e-signatures_1.pdf",
+      "section_title": "Send a document to get signatures from others",
+      "importance_rank": 2,
+      "page_number": 2
+    },
+    {
+      "document": "The Ultimate PDF Sharing Checklist.pdf",
+      "section_title": "Send a document to get signatures from others",
+      "importance_rank": 3,
+      "page_number": 1
+    },
+    {
+      "document": "Learn Acrobat - Create and Convert_1.pdf",
+      "section_title": "Convert clipboard content to PDF",
+      "importance_rank": 4,
+      "page_number": 4
+    },
+    {
+      "document": "Learn Acrobat - Create and Convert_2.pdf",
+      "section_title": "Send a document to get signatures from others",
+      "importance_rank": 5,
+      "page_number": 13
+    }
+  ],
+  "subsection_analysis": [
+    {
+      "document": "Learn Acrobat - Create and Convert_1.pdf",
+      "refined_text": "To add a blank page to an existing PDF, open the PDF and then choose Edit > Organize pages > Insert > Blank page.",
+      "page_number": 12
+    },
+    {
+      "document": "Learn Acrobat - Request e-signatures_1.pdf",
+      "refined_text": "Open the PDF form in Acrobat or Acrobat Reader, and then choose All tools > Request E-signatures. Alternatively, you can select Sign from the top toolbar. The Request Signatures window is displayed. In the recipients field, add recipient email addresses in the order you want the document to be signed. The Mail and Message fields are just like the ones you use for sending an email and appear to your recipients in the same way. Change the default text in the Subject & Message area as appropriate.",
+      "page_number": 2
+    },
+    {
+      "document": "The Ultimate PDF Sharing Checklist.pdf",
+      "refined_text": "The Ultimate PDF Sharing Checklist Sharing PDFs can be a breeze with Adobe Acrobat.",
+      "page_number": 1
+    },
+    {
+      "document": "Learn Acrobat - Create and Convert_1.pdf",
+      "refined_text": "1: From the top tools bar, select Create.",
+      "page_number": 4
+    },
+    {
+      "document": "Learn Acrobat - Create and Convert_2.pdf",
+      "refined_text": "Choose Save As Adobe PDF from the PDF menu at the bottom of the dialog box.",
+      "page_number": 13
+    }
+  ]
+}

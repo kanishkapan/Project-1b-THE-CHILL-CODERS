@@ -147,14 +147,14 @@ def main():
         else:
             logger.info(f"✅ Processing time constraint met: {processing_time:.2f}s")
         
-        print(f"\n🎉 Document intelligence processing completed successfully!")
-        print(f"📊 Processed {len(documents)} documents in {processing_time:.2f} seconds")
-        print(f"📄 Results saved to: {output_path}")
-        print(f"⭐ Found {len(top_sections)} highly relevant sections")
+        print(f"\n[SUCCESS] Document intelligence processing completed successfully!")
+        print(f"[INFO] Processed {len(documents)} documents in {processing_time:.2f} seconds")
+        print(f"[INFO] Results saved to: {output_path}")
+        print(f"[INFO] Found {len(top_sections)} highly relevant sections")
         if len(top_sections) > 0:
-            print(f"🔍 Average relevance score: {sum(s.relevance_score for s in top_sections) / len(top_sections):.3f}")
+            print(f"[INFO] Average relevance score: {sum(s.relevance_score for s in top_sections) / len(top_sections):.3f}")
         else:
-            print(f"🔍 Average relevance score: 0.000")
+            print(f"[INFO] Average relevance score: 0.000")
         
         # Generate and display summary report
         summary_report = output_generator.generate_summary_report(output_data)

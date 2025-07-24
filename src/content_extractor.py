@@ -157,6 +157,9 @@ class ContentExtractor:
         if len(content) > self.max_section_length:
             content = content[:self.max_section_length] + "..."
         
+        # Generate descriptive title based on content and context
+        descriptive_title = self._generate_descriptive_title(title, content, filename, persona_context)
+        
         # Calculate relevance score
         relevance_score = self._calculate_relevance_score(content, persona_context)
         
@@ -164,7 +167,7 @@ class ContentExtractor:
         key_concepts = extract_keywords(content, max_keywords=10)
         
         # Determine section type
-        section_type = self._classify_section_type(title, content)
+        section_type = self._classify_section_type(descriptive_title, content)
         
         # Create preview
         content_preview = content[:200] + "..." if len(content) > 200 else content
@@ -172,7 +175,7 @@ class ContentExtractor:
         return ExtractedSection(
             document=filename,
             page_number=page_number,
-            section_title=title,
+            section_title=descriptive_title,
             content=content,
             content_preview=content_preview,
             relevance_score=relevance_score,
@@ -217,6 +220,132 @@ class ContentExtractor:
             content = content[:self.max_section_length]
         
         return content
+    
+    def _generate_descriptive_title(self, original_title: str, content: str, 
+                                   filename: str, persona_context: PersonaContext) -> str:
+        """Generate descriptive title based on content analysis - GENERALIZABLE approach."""
+        content_lower = content.lower()
+        
+        # STEP 1: If original title is already good and descriptive, use it
+        if (10 <= len(original_title) <= 80 and 
+            original_title not in ["Full Page Content", "General", "Introduction", "Conclusion"] and
+            not original_title.endswith(":")):
+            return original_title
+        
+        # STEP 2: Extract meaningful titles from content structure
+        # Look for section headers in the content
+        lines = content.split('\n')
+        for line in lines[:10]:  # Check first 10 lines
+            line = line.strip()
+            if (15 <= len(line) <= 100 and 
+                not line.lower().startswith(('the ', 'this ', 'that ', 'it ', 'as ', 'in ', 'on ', 'at ')) and
+                line.count('.') <= 2 and  # Not a long sentence
+                any(c.isupper() for c in line)):  # Has some capital letters
+                return line
+        
+        # STEP 3: Content-based intelligent title generation (GENERALIZABLE)
+        content_themes = self._analyze_content_themes(content_lower, persona_context)
+        
+        if content_themes:
+            # Pick the most relevant theme based on persona
+            primary_theme = content_themes[0]
+            return self._format_theme_as_title(primary_theme, filename)
+        
+        # STEP 4: Fallback - extract file theme and create descriptive title
+        file_base = filename.replace('.pdf', '').replace('_', ' ').replace('-', ' ')
+        # Remove common prefixes/suffixes
+        for prefix in ['South of France - ', 'Research Paper ', 'Document ', 'Report ']:
+            if file_base.startswith(prefix):
+                file_base = file_base[len(prefix):]
+        
+        # If content has substantial information, create descriptive title
+        if len(content) > 500:
+            return f"{file_base} - Comprehensive Overview"
+        else:
+            return file_base
+    
+    def _analyze_content_themes(self, content_lower: str, persona_context: PersonaContext) -> List[str]:
+        """Analyze content to identify major themes - GENERALIZABLE."""
+        themes = []
+        
+        # Define theme patterns that work across domains
+        theme_patterns = {
+            'methodology': ['method', 'approach', 'technique', 'procedure', 'process', 'framework'],
+            'analysis': ['analysis', 'evaluation', 'assessment', 'comparison', 'study', 'examination'],
+            'results': ['results', 'findings', 'outcomes', 'performance', 'metrics', 'benchmarks'],
+            'implementation': ['implementation', 'development', 'construction', 'building', 'creation'],
+            'guidelines': ['guidelines', 'recommendations', 'best practices', 'tips', 'advice', 'suggestions'],
+            'overview': ['overview', 'introduction', 'background', 'summary', 'guide', 'primer'],
+            'technical': ['architecture', 'design', 'specification', 'technical', 'engineering'],
+            'data': ['data', 'dataset', 'database', 'information', 'statistics', 'metrics'],
+            'business': ['business', 'market', 'financial', 'economic', 'commercial', 'industry'],
+            'activities': ['activities', 'things to do', 'experiences', 'attractions', 'adventures'],
+            'planning': ['planning', 'preparation', 'organization', 'scheduling', 'coordination'],
+            'culture': ['culture', 'tradition', 'heritage', 'history', 'historical', 'cultural'],
+            'practical': ['practical', 'tips', 'tricks', 'how-to', 'guide', 'instructions']
+        }
+        
+        # Score each theme based on content
+        theme_scores = {}
+        for theme, keywords in theme_patterns.items():
+            score = sum(1 for keyword in keywords if keyword in content_lower)
+            if score > 0:
+                theme_scores[theme] = score
+        
+        # Sort themes by relevance to persona and content
+        if theme_scores:
+            # Boost themes relevant to persona
+            persona_role = persona_context.role.lower()
+            
+            if 'research' in persona_role:
+                theme_scores['methodology'] = theme_scores.get('methodology', 0) * 1.5
+                theme_scores['analysis'] = theme_scores.get('analysis', 0) * 1.3
+                theme_scores['results'] = theme_scores.get('results', 0) * 1.3
+            
+            elif 'business' in persona_role or 'analyst' in persona_role:
+                theme_scores['business'] = theme_scores.get('business', 0) * 1.5
+                theme_scores['analysis'] = theme_scores.get('analysis', 0) * 1.3
+            
+            elif 'travel' in persona_role or 'planner' in persona_role:
+                theme_scores['activities'] = theme_scores.get('activities', 0) * 1.5
+                theme_scores['planning'] = theme_scores.get('planning', 0) * 1.3
+                theme_scores['practical'] = theme_scores.get('practical', 0) * 1.3
+            
+            # Return top themes
+            sorted_themes = sorted(theme_scores.items(), key=lambda x: x[1], reverse=True)
+            themes = [theme for theme, score in sorted_themes if score > 0]
+        
+        return themes
+    
+    def _format_theme_as_title(self, theme: str, filename: str) -> str:
+        """Format theme as a proper title - GENERALIZABLE."""
+        # Extract subject from filename
+        file_subject = filename.replace('.pdf', '').replace('_', ' ').replace('-', ' ')
+        
+        # Remove common prefixes
+        for prefix in ['South of France - ', 'Research Paper ', 'Document ', 'Report ']:
+            if file_subject.startswith(prefix):
+                file_subject = file_subject[len(prefix):]
+        
+        # Create title based on theme
+        theme_titles = {
+            'methodology': f"{file_subject} - Methodology and Approach",
+            'analysis': f"{file_subject} - Analysis and Evaluation", 
+            'results': f"{file_subject} - Results and Findings",
+            'implementation': f"{file_subject} - Implementation Guide",
+            'guidelines': f"{file_subject} - Guidelines and Best Practices",
+            'overview': f"{file_subject} - Comprehensive Overview",
+            'technical': f"{file_subject} - Technical Specifications",
+            'data': f"{file_subject} - Data and Metrics",
+            'business': f"{file_subject} - Business Analysis",
+            'activities': f"{file_subject} - Activities and Experiences",
+            'planning': f"{file_subject} - Planning Guide",
+            'culture': f"{file_subject} - Cultural and Historical Context",
+            'practical': f"{file_subject} - Practical Tips and Guidelines"
+        }
+        
+        return theme_titles.get(theme, f"{file_subject} - {theme.title()}")
+    
     
     def _calculate_relevance_score(self, content: str, persona_context: PersonaContext) -> float:
         """Calculate relevance score for content based on persona context."""

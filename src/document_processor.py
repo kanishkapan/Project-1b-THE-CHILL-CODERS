@@ -48,11 +48,22 @@ class DocumentProcessor:
         if not documents_path.exists():
             raise FileNotFoundError(f"Documents directory not found: {documents_dir}")
         
-        # Find PDF files
+        # Find PDF files (avoid duplicates)
         pdf_files = []
         for ext in self.supported_extensions:
-            pdf_files.extend(list(documents_path.glob(f"*{ext}")))
-            pdf_files.extend(list(documents_path.glob(f"**/*{ext}")))  # Recursive search
+            # Use recursive search only, but remove duplicates
+            all_files = list(documents_path.glob(f"**/*{ext}"))
+            pdf_files.extend(all_files)
+        
+        # Remove duplicates while preserving order
+        seen = set()
+        unique_pdf_files = []
+        for pdf_file in pdf_files:
+            file_path = pdf_file.resolve()
+            if file_path not in seen:
+                seen.add(file_path)
+                unique_pdf_files.append(pdf_file)
+        pdf_files = unique_pdf_files
         
         # Limit number of documents
         pdf_files = pdf_files[:max_docs]
