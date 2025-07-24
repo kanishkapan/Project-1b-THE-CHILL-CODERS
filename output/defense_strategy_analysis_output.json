@@ -1,0 +1,70 @@
+{
+  "metadata": {
+    "input_documents": [
+      "defense_strategy.pdf",
+      "file20.pdf"
+    ],
+    "persona": "Defense Strategy Analyst",
+    "job_to_be_done": "Analyze comprehensive defense strategy document to extract key strategic recommendations and system requirements for airborne reconnaissance capabilities",
+    "processing_timestamp": "2025-07-24T19:20:32.550745+00:00"
+  },
+  "extracted_sections": [
+    {
+      "document": "defense_strategy.pdf",
+      "section_title": "defense strategy - Comprehensive Overview",
+      "importance_rank": 1,
+      "page_number": 1
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "section_title": "defense strategy - Methodology and Approach",
+      "importance_rank": 2,
+      "page_number": 5
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "section_title": "defense strategy - Data and Metrics",
+      "importance_rank": 3,
+      "page_number": 2
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "section_title": "defense strategy - Technical Specifications",
+      "importance_rank": 4,
+      "page_number": 3
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "section_title": "defense strategy - Technical Specifications",
+      "importance_rank": 5,
+      "page_number": 4
+    }
+  ],
+  "subsection_analysis": [
+    {
+      "document": "defense_strategy.pdf",
+      "refined_text": "AIRBORNE RECONNAISSANCE STRATEGY Executive Summary Introduction This document presents a strategy for developing a comprehensive, integrated and efficient airborne reconnaissance capability; one that, in concert with space-based assets, will meet the needs of the warfighter through 2010.",
+      "page_number": 1
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "refined_text": "Phase 1: Foundation Development (Years 1-3) Establish core infrastructure components including communication networks, data processing centers, and initial platform modifications.",
+      "page_number": 5
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "refined_text": "Integrated Multi-Platform Architecture Establish a comprehensive system architecture that integrates manned and unmanned platforms with space-based assets, creating a synergistic reconnaissance network that maximizes operational effectiveness while minimizing redundancy.",
+      "page_number": 2
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "refined_text": "This architecture is characterized by several key components: Manned Platform Integration Traditional manned reconnaissance aircraft will continue to play a crucial role in the overall architecture, providing human judgment and adaptability in complex operational environments.",
+      "page_number": 3
+    },
+    {
+      "document": "defense_strategy.pdf",
+      "refined_text": "Sensor Integration Standards All reconnaissance platforms must incorporate standardized sensor interfaces and data formats to ensure seamless information sharing across the integrated architecture.",
+      "page_number": 4
+    }
+  ]
+}

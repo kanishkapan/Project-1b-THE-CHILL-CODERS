@@ -1,0 +1,66 @@
+{
+  "challenge_info": {
+    "challenge_id": "defense_strategy_analysis",
+    "test_case_name": "defense_strategy_analysis",
+    "description": "Analysis of comprehensive defense strategy document for airborne reconnaissance capabilities"
+  },
+  "documents_folder": "sample_docs",
+  "persona": {
+    "role": "Defense Strategy Analyst",
+    "department": "Military Intelligence & Strategic Planning",
+    "seniority": "Senior Analyst",
+    "experience_years": 8,
+    "background": "Former military officer with expertise in reconnaissance systems, strategic planning, and defense technology integration. Specializes in analyzing military capabilities and developing strategic recommendations.",
+    "responsibilities": [
+      "Analyze defense strategies and military capabilities",
+      "Evaluate reconnaissance and intelligence systems",
+      "Develop strategic recommendations for military leadership",
+      "Assess operational requirements and technological solutions",
+      "Review defense architecture and system integration plans"
+    ],
+    "key_interests": [
+      "Airborne reconnaissance capabilities",
+      "Intelligence gathering systems",
+      "Military technology integration",
+      "Strategic defense planning",
+      "Operational effectiveness",
+      "System interoperability"
+    ]
+  },
+  "job_to_be_done": {
+    "task": "Analyze comprehensive defense strategy document to extract key strategic recommendations and system requirements for airborne reconnaissance capabilities",
+    "primary_goal": "Analyze comprehensive defense strategy document to extract key strategic recommendations and system requirements for airborne reconnaissance capabilities",
+    "specific_tasks": [
+      "Identify strategic objectives and mission requirements for extended reconnaissance",
+      "Extract technical specifications and system architecture details",
+      "Analyze operational capabilities and performance requirements",
+      "Review integration strategies between manned and unmanned platforms",
+      "Assess resource allocation and deployment strategies",
+      "Identify critical success factors and implementation timelines"
+    ],
+    "context": "Preparing strategic briefing for defense leadership on next-generation airborne reconnaissance systems and their integration into existing military infrastructure",
+    "urgency": "high",
+    "outcome_expectations": [
+      "Clear understanding of strategic vision and objectives",
+      "Detailed technical requirements and system specifications",
+      "Implementation roadmap and deployment strategy",
+      "Risk assessment and mitigation strategies",
+      "Budget implications and resource requirements",
+      "Operational impact and capability enhancements"
+    ]
+  },
+  "focus_areas": [
+    "Strategic objectives and mission requirements",
+    "System architecture and technical specifications",
+    "Operational capabilities and performance metrics",
+    "Integration strategies and interoperability",
+    "Resource allocation and implementation planning",
+    "Risk assessment and contingency planning"
+  ],
+  "output_preferences": {
+    "prioritize": "strategic_significance",
+    "include_details": true,
+    "technical_depth": "high",
+    "format": "executive_summary_style"
+  }
+}

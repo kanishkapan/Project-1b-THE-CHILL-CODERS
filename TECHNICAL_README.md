@@ -44,7 +44,7 @@ Job Intent Detection:
 ```
 
 #### Layer 3: Content-Aware Ranking Engine
-```python
+```python   
 Optimized Ranking System:
 - Base Relevance: TF-IDF + semantic similarity
 - Persona Boost: +40% for role-specific content

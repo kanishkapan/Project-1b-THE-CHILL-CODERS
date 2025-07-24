@@ -114,7 +114,7 @@ class ContentExtractor:
         page_text = page_data['text']
         
         # If page has identified sections, process them
-        if page_data['sections']:
+        if page_data.get('sections'):
             for section_info in page_data['sections']:
                 section = self._create_section_from_info(
                     section_info, page_text, filename, page_number, persona_context
