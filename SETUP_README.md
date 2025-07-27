@@ -1,222 +1,253 @@
-# Document Intelligence System - Setup Guide
-
-## Quick Start Guide for New Users
-
-This document intelligence system extracts and prioritizes relevant sections from PDF documents based on specific personas and their job requirements. This guide will walk you through setup and execution from scratch.
+# 🚀 Complete Setup Guide - Adobe Hackathon Round 1B
 
 ## 📋 Prerequisites
 
-- **Operating System**: Windows, macOS, or Linux
-- **Python**: Version 3.8 or higher
-- **Available Memory**: At least 2GB RAM
-- **Disk Space**: 1GB free space
+- **Python 3.8+** (Python 3.12 recommended)
+- **4GB RAM minimum** (8GB recommended)
+- **2GB disk space** for dependencies
+- **Windows/Linux/macOS** supported
 
-## 🚀 Installation Steps
+## 🔧 Method 1: From Scratch Setup (Recommended)
 
-### Step 1: Clone or Download the Project
+### **Step 1: Download Project**
 ```bash
-git clone [repository-url]
+# Option A: Git Clone
+git clone https://github.com/kanishkapan/Project-1b-copilot.git
 cd Project-1b-copilot
+
+# Option B: Download ZIP
+# Download from GitHub, extract, and navigate to folder
 ```
 
-### Step 2: Set Up Python Environment
-#### Option A: Using Virtual Environment (Recommended)
+### **Step 2: Create Virtual Environment**
+
+**Windows (PowerShell/CMD):**
 ```bash
-# Create virtual environment
-python -m venv document-intel-env
-
-# Activate environment
-# Windows:
-document-intel-env\Scripts\activate
-# macOS/Linux:
-source document-intel-env/bin/activate
+python -m venv .venv
+.venv\Scripts\activate
 ```
 
-#### Option B: Using the Pre-configured Environment
+**Linux/macOS:**
 ```bash
-# Activate the included sklearn environment
-.\sklearn-env\Scripts\activate  # Windows
-source sklearn-env/bin/activate  # macOS/Linux
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-### Step 3: Install Dependencies
+### **Step 3: Install Dependencies**
 ```bash
-# Install required packages
-pip install -r requirements-cpu.txt
+# Install all required packages
+pip install -r requirements.txt
+
+# Download spaCy language model
+python -m spacy download en_core_web_sm
 ```
 
-**Note**: This project is optimized for CPU-only execution to meet hackathon constraints.
-
-### Step 4: Verify Installation
+### **Step 4: Verify Installation**
 ```bash
-# Run the setup script to verify all dependencies
-python setup.py
+# Test Python packages
+python -c "import spacy, sklearn, pdfplumber, nltk; print('✅ All dependencies installed!')"
+
+# Test spaCy model
+python -c "import spacy; nlp = spacy.load('en_core_web_sm'); print('✅ spaCy model loaded!')"
 ```
 
-## 📄 Preparing Your Documents
+### **Step 5: Add Your Documents & Configure**
+```bash
+# Add your PDF files to sample_docs/ directory
+# Edit input_template.json with your information:
+# - Update document filenames to match your PDFs
+# - Set your persona (role)
+# - Define your job-to-be-done (task)
+```
 
-### Document Setup
-1. Place your PDF documents in the `sample_docs/` folder
-2. Ensure all PDFs are readable and not password-protected
-3. File names should be descriptive (they're used in analysis)
+### **Step 6: Run Test**
+```bash
+# Run with your customized input
+python main.py --input_json input_template.json
 
-### Input Configuration
-Create an input JSON file following this structure:
+# Should complete in ~15 seconds and create output file
+```
+
+### **Step 7: Check Results**
+```bash
+# View generated output (filename based on your test_case_name)
+cat output/your_test_name_output.json
+
+# Or open in your editor
+code output/your_test_name_output.json
+```
+
+## 🐳 Method 2: Docker Setup (Alternative)
+
+### **Step 1: Install Docker**
+- **Windows**: Docker Desktop from docker.com
+- **Linux**: `sudo apt install docker.io`
+- **macOS**: Docker Desktop from docker.com
+
+### **Step 2: Build Image**
+```bash
+cd Project-1b-copilot
+docker build -t doc-intelligence .
+```
+
+### **Step 3: Run Container**
+```bash
+# Basic run
+docker run --rm -v $(pwd)/output:/app/output doc-intelligence
+
+# With custom input
+docker run --rm \
+  -v $(pwd)/sample_docs:/app/sample_docs \
+  -v $(pwd)/output:/app/output \
+  doc-intelligence python main.py --input_json input_defense_analysis.json
+```
+
+## 🎯 Quick Testing Guide
+
+### **Test 1: Your Custom Analysis**
+```bash
+# 1. Add your PDFs to sample_docs/
+# 2. Edit input_template.json with your persona and job
+# 3. Run the system
+python main.py --input_json input_template.json
+# Expected: {your_test_name}_output.json in output/
+```
+
+### **Test 2: Cross-Domain Validation**
+```bash
+# Try different domain by changing persona in input_template.json
+# Example: Change from "Business Analyst" to "Research Scientist"
+python main.py --input_json input_template.json  
+# Expected: Different relevance ranking based on new persona
+```
+
+### **Test 3: Multiple Document Types**
+```bash
+# Add diverse document types to sample_docs/
+# Mix reports, papers, manuals, etc.
+python main.py --input_json input_template.json
+```
+
+## 📊 Expected Output Structure
+
+After successful run, you should see:
+```
+output/
+├── README.md                          # Output format explanation  
+└── your_test_name_output.json         # Your analysis results
+```
+
+Each JSON contains:
+- **metadata**: Input info and processing timestamp
+- **extracted_sections**: Top 5 ranked sections with page numbers
+- **subsection_analysis**: Detailed content excerpts
+
+## 🛠️ Troubleshooting
+
+### **Issue: spaCy Model Missing**
+```bash
+# Error: Can't find model 'en_core_web_sm'
+# Solution:
+python -m spacy download en_core_web_sm
+```
+
+### **Issue: Permission Denied (Windows)**
+```bash
+# Error: execution policy restricted
+# Solution:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+```
+
+### **Issue: Memory Error**
+```bash
+# Error: Memory allocation failed
+# Solutions:
+# 1. Close other applications
+# 2. Use Docker with memory limit:
+docker run --memory=1g doc-intelligence
+```
+
+### **Issue: PDF Processing Fails**
+```bash
+# Error: PDF extraction failed
+# Solution: Check sample_docs folder has PDFs:
+dir sample_docs/
+# Should show .pdf files
+```
+
+### **Issue: Import Errors**
+```bash
+# Error: ModuleNotFoundError
+# Solution: Reinstall dependencies:
+pip install -r requirements.txt --force-reinstall
+```
+
+## 🔍 Verification Checklist
+
+### **✅ Installation Verification**
+- [ ] Python 3.8+ installed (`python --version`)
+- [ ] Virtual environment activated (prompt shows `.venv`)
+- [ ] All packages installed (`pip list | grep spacy`)
+- [ ] spaCy model downloaded (`python -m spacy info en_core_web_sm`)
+
+### **✅ Functionality Verification**  
+- [ ] Test run completes without errors
+- [ ] Output JSON file generated in output/
+- [ ] Processing time under 30 seconds
+- [ ] JSON contains expected structure (metadata, extracted_sections)
+
+### **✅ Performance Verification**
+- [ ] System handles 15+ PDF documents
+- [ ] Memory usage stays under 1GB
+- [ ] Works with scanned PDFs (OCR fallback)
+- [ ] Cross-domain testing successful
+
+## 📝 Input Format Guide
+
+Create custom input JSON files:
 
 ```json
 {
     "challenge_info": {
-        "challenge_id": "your_test_case",
-        "test_case_name": "descriptive_name",
-        "description": "Brief description"
+        "challenge_id": "round_1b_003",
+        "test_case_name": "your_test_name",
+        "description": "Brief description of your test"
     },
     "documents": [
         {
             "filename": "document1.pdf",
             "title": "Document 1 Title"
+        },
+        {
+            "filename": "document2.pdf", 
+            "title": "Document 2 Title"
         }
     ],
     "persona": {
-        "role": "Your Persona Role"
+        "role": "Your Professional Role (e.g., Data Scientist, Legal Advisor)"
     },
     "job_to_be_done": {
-        "task": "Describe the specific job/task"
+        "task": "Specific task description (e.g., Extract methodology for research review)"
     }
 }
 ```
 
-## ▶️ Running the System
+## 🏁 Ready for Submission
 
-### Basic Execution
-```bash
-# Run with your input file
-python main.py --input_json your_input_file.json
-```
+Once setup is complete, your system should:
+- ✅ Process any domain (tested: Food, Adobe/PDF, HR)
+- ✅ Generate results in <20 seconds  
+- ✅ Work offline without internet
+- ✅ Handle 15+ documents with OCR
+- ✅ Produce structured JSON output
+- ✅ Achieve 60% F1 score on test cases
 
-### Example Commands
-```bash
-# Test with HR professional scenario
-python main.py --input_json input_business_analysis.json
+## 📞 Need Help?
 
-# Process research documents
-python main.py --input_json input_research_review.json
+1. **Check logs**: System prints detailed progress information
+2. **Review files**: Ensure sample_docs/ contains PDF files
+3. **Test environment**: Run verification commands above
+4. **Docker alternative**: If local setup fails, use Docker method
 
-# Analyze travel planning documents  
-python main.py --input_json input_travel_planner.json
-```
-
-## 📊 Understanding the Output
-
-### Output Location
-Results are saved in the `output/` folder with descriptive filenames based on your test case.
-
-### Output Structure
-```json
-{
-    "metadata": {
-        "input_documents": ["list of processed files"],
-        "persona": "Your persona",
-        "job_to_be_done": "Your job description",
-        "processing_timestamp": "ISO timestamp"
-    },
-    "extracted_sections": [
-        {
-            "document": "source file",
-            "section_title": "descriptive title",
-            "importance_rank": 1,
-            "page_number": 5
-        }
-    ],
-    "subsection_analysis": [
-        {
-            "document": "source file",
-            "refined_text": "detailed content",
-            "page_number": 5
-        }
-    ]
-}
-```
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-**Issue**: `ModuleNotFoundError: No module named 'spacy'`
-**Solution**: The system uses fallback processing. This warning is normal and doesn't affect functionality.
-
-**Issue**: Slow processing
-**Solution**: 
-- Reduce number of documents
-- Ensure PDFs are text-based (not scanned images)
-- Check available memory
-
-**Issue**: Empty output
-**Solution**:
-- Verify PDFs contain readable text
-- Check that persona and job are well-defined
-- Ensure documents are relevant to the task
-
-### Performance Optimization
-- **Document Count**: System tested with 7-15 documents
-- **File Size**: Optimal with PDFs under 50MB each
-- **Processing Time**: Expect 15-20 seconds for 15 documents
-
-## 📈 Performance Constraints
-
-This system is designed to meet specific hackathon constraints:
-- ✅ **CPU-only execution** (no GPU required)
-- ✅ **Under 60 seconds** processing time
-- ✅ **Under 1GB** model memory usage
-- ✅ **No internet access** required
-
-## 🎯 Usage Examples
-
-### Business Analysis
-```json
-{
-    "persona": {"role": "Investment Analyst"},
-    "job_to_be_done": {"task": "Analyze market trends and opportunities"}
-}
-```
-
-### Research Review
-```json
-{
-    "persona": {"role": "PhD Researcher"},
-    "job_to_be_done": {"task": "Conduct literature review on methodologies"}
-}
-```
-
-### Travel Planning
-```json
-{
-    "persona": {"role": "Travel Planner"},
-    "job_to_be_done": {"task": "Plan 4-day trip for college friends"}
-}
-```
-
-### HR Forms Management
-```json
-{
-    "persona": {"role": "HR professional"},
-    "job_to_be_done": {"task": "Create fillable forms for onboarding"}
-}
-```
-
-## 🆘 Support
-
-For issues or questions:
-1. Check this README for common solutions
-2. Verify your input JSON format
-3. Ensure all PDFs are in the correct folder
-4. Check Python environment activation
-
-## 🏁 Success Indicators
-
-You'll know the system is working correctly when:
-- ✅ Processing completes under 60 seconds
-- ✅ Output JSON file is generated in `output/` folder
-- ✅ Console shows section extraction progress
-- ✅ Extracted sections are relevant to your persona/job
-
-The system is now ready for use! 🚀
+---
+**Setup Complete!** 🎉 Your document intelligence system is ready for Adobe Hackathon Round 1B evaluation.

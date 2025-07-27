@@ -52,7 +52,7 @@ class RankingEngine:
             'length': 0.1          # Content length bonus
         }
         
-        # Section type importance mapping
+        # Universal section type importance mapping
         self.section_importance = {
             'abstract': 0.9,
             'summary': 0.85,
@@ -61,20 +61,21 @@ class RankingEngine:
             'results': 0.9,
             'discussion': 0.8,
             'conclusion': 0.85,
-            'literature_review': 0.75,
-            'financial': 0.8,
-            'technical': 0.75,
-            'general': 0.5
+            'content': 0.75,
+            'general': 0.6,
+            'default': 0.5  # For unknown section types
         }
         
-        # Job intent to section type mapping
+        # Dynamic job intent to section type mapping - universal patterns
         self.intent_section_preference = {
-            'comprehensive_review': ['methodology', 'results', 'discussion', 'literature_review'],
-            'summary': ['abstract', 'summary', 'conclusion'],
-            'comparison': ['results', 'analysis', 'discussion'],
-            'analysis': ['results', 'analysis', 'methodology'],
-            'extraction': ['methodology', 'technical', 'implementation'],
-            'preparation': ['introduction', 'background', 'summary']
+            'comprehensive_review': ['methodology', 'results', 'discussion', 'conclusion', 'introduction'],
+            'summary': ['abstract', 'summary', 'conclusion', 'overview'],
+            'comparison': ['results', 'discussion', 'analysis', 'evaluation'],
+            'analysis': ['results', 'discussion', 'methodology', 'data'],
+            'extraction': ['methodology', 'content', 'details', 'information'],
+            'preparation': ['introduction', 'summary', 'overview', 'background'],
+            'implementation': ['methodology', 'procedure', 'process', 'steps'],
+            'optimization': ['results', 'performance', 'analysis', 'evaluation']
         }
     
     def rank_sections(self, sections: List[ExtractedSection], 
@@ -139,7 +140,7 @@ class RankingEngine:
         length_score = self._calculate_length_score(section)
         
         # Calculate priority boost for target sections (WINNING FACTOR)
-        priority_boost = self._calculate_priority_boost(section)
+        priority_boost = self._calculate_priority_boost(section, persona_context)
         
         # Combine scores using weights
         final_score = (
@@ -256,107 +257,107 @@ class RankingEngine:
             # Diminishing returns for very long sections
             return 1.0 - min(0.5, (word_count - 300) / 1000.0)
     
-    def _calculate_priority_boost(self, section: ExtractedSection) -> float:
+    def _calculate_priority_boost(self, section: ExtractedSection, persona_context: PersonaContext) -> float:
         """
-        WINNING FACTOR: Calculate priority boost with proven pattern detection.
+        Calculate priority boost with dynamic pattern detection based on persona context.
         
-        Uses domain-adaptive patterns that work for current test case and can be
-        extended for other domains (research, business, education).
+        Uses adaptive patterns that work across all domains by leveraging persona analysis.
         
         Returns:
-            Priority boost score (0.0 to 15.0)
+            Priority boost score (0.0 to 10.0)
         """
         content = section.content.lower()
         
-        # PROVEN PATTERNS for current test case (guaranteed 5/5 performance)
-        target_patterns = {
-            "Change flat forms to fillable (Acrobat Pro)": [
-                "flat forms to fillable", "change flat forms", "prepare forms",
-                "interactive form", "fillable form", "convert forms", "form creation"
-            ],
-            "Create multiple PDFs from multiple files": [
-                "multiple pdfs from multiple files", "create multiple pdfs",
-                "combine files", "batch create", "batch pdf"
-            ],
-            "Convert clipboard content to PDF": [
-                "clipboard content", "convert clipboard", "clipboard to pdf",
-                "paste content", "from clipboard", "clipboard content to pdf"
-            ],
-            "Fill and sign PDF forms": [
-                "fill and sign", "fill & sign", "fill in form", "sign pdf forms",
-                "form filling", "fill forms", "pdf forms"
-            ],
-            "Send a document to get signatures from others": [
-                "open the pdf", "request e-signatures", "recipients field", 
-                "email addresses", "order you want", "mail and message",
-                "choose all tools", "request signatures", "subject & message"
-            ]
+        # Dynamic pattern matching based on persona context
+        
+        # Use persona priority topics as patterns instead of hardcoded domains
+        persona_boost = 0.0
+        
+        if persona_context.priority_topics:
+            # Check how many priority topics appear in content
+            matching_topics = sum(1 for topic in persona_context.priority_topics 
+                                if topic.lower() in content)
+            
+            # Apply boost based on topic coverage
+            if matching_topics > 0:
+                # More topics = higher boost, but with diminishing returns
+                persona_boost = min(3.0, matching_topics * 0.5)
+        
+        # Check for job-specific keywords from job description
+        job_keywords_boost = 0.0
+        if persona_context.job_keywords:
+            matching_keywords = sum(1 for keyword in persona_context.job_keywords 
+                                  if keyword.lower() in content)
+            
+            if matching_keywords > 0:
+                job_keywords_boost = min(2.0, matching_keywords * 0.3)
+        
+        # Intent-based boost
+        intent_boost = 0.0
+        intent_keywords = {
+            'comprehensive_review': ['comprehensive', 'complete', 'detailed', 'thorough'],
+            'analysis': ['analysis', 'evaluate', 'assess', 'examine'],
+            'preparation': ['prepare', 'plan', 'organize', 'setup'],
+            'summary': ['summary', 'overview', 'brief', 'highlights'],
+            'implementation': ['implement', 'execute', 'apply', 'build']
         }
         
-        # Apply proven patterns with maximum boost for current test case
-        for title, patterns in target_patterns.items():
-            if any(pattern in content for pattern in patterns):
-                # Specific page prioritization for guaranteed results
-                if (title == "Create multiple PDFs from multiple files" and 
-                    section.page_number == 12 and "learn acrobat - create and convert_1" in section.document.lower()):
-                    return 15.0  # Maximum boost for exact match
-                elif (title == "Send a document to get signatures from others" and 
-                      section.page_number == 2 and "request e-signatures_1" in section.document.lower()):
-                    return 15.0  # Maximum boost for exact match
-                elif (title == "Fill and sign PDF forms" and section.page_number == 2 and 
-                      "fill and sign" in section.document.lower()):
-                    return 12.0  # High boost
-                elif (title == "Change flat forms to fillable (Acrobat Pro)" and section.page_number == 12 and 
-                      "fill and sign" in section.document.lower()):
-                    return 12.0  # High boost
-                elif (title == "Convert clipboard content to PDF" and section.page_number == 10 and 
-                      "create and convert" in section.document.lower()):
-                    return 12.0  # High boost
-                else:
-                    return 10.0  # High priority for any matching target pattern
+        if persona_context.job_intent in intent_keywords:
+            intent_words = intent_keywords[persona_context.job_intent]
+            if any(word in content for word in intent_words):
+                intent_boost = 1.0
         
-        # GENERALIZATION PATTERNS for other test cases
-        # (Can be activated by modifying the conditions above)
+        # Section type boost - favor sections that match expected section types
+        section_type_boost = 0.0
+        if section.section_type in persona_context.relevant_sections:
+            section_type_boost = 1.0
         
-        # Research domain patterns
-        research_patterns = [
-            "methodology", "literature review", "findings", "results", "conclusion",
-            "data analysis", "experiment", "study", "research question", "hypothesis"
-        ]
+        total_boost = persona_boost + job_keywords_boost + intent_boost + section_type_boost
+        return min(10.0, total_boost)  # Cap at 10.0
         
-        # Business domain patterns  
-        business_patterns = [
-            "revenue", "profit", "market share", "financial performance", "investment",
-            "strategy", "competitive analysis", "growth", "ROI", "business model"
-        ]
+        # Use persona priority topics as patterns instead of hardcoded domains
+        persona_boost = 0.0
         
-        # Education domain patterns
-        education_patterns = [
-            "key concept", "principle", "theory", "example", "problem solving",
-            "mechanism", "reaction", "formula", "definition", "application"
-        ]
+        if persona_context.priority_topics:
+            content_lower = content.lower()
+            
+            # Check how many priority topics appear in content
+            matching_topics = sum(1 for topic in persona_context.priority_topics 
+                                if topic.lower() in content_lower)
+            
+            # Apply boost based on topic coverage
+            if matching_topics > 0:
+                # More topics = higher boost, but with diminishing returns
+                persona_boost = min(3.0, matching_topics * 0.5)
         
-        # Apply domain patterns with moderate boost (for generalization)
-        domain_boost = 0.0
+        # Check for job-specific keywords from job description
+        job_keywords_boost = 0.0
+        if persona_context.job_keywords:
+            content_lower = content.lower()
+            matching_keywords = sum(1 for keyword in persona_context.job_keywords 
+                                  if keyword.lower() in content_lower)
+            
+            if matching_keywords > 0:
+                job_keywords_boost = min(2.0, matching_keywords * 0.3)
         
-        # Check research patterns
-        if any(pattern in content for pattern in research_patterns):
-            domain_boost += 2.0
+        # Intent-based boost
+        intent_boost = 0.0
+        intent_keywords = {
+            'comprehensive_review': ['comprehensive', 'complete', 'detailed', 'thorough'],
+            'analysis': ['analysis', 'evaluate', 'assess', 'examine'],
+            'preparation': ['prepare', 'plan', 'organize', 'setup'],
+            'summary': ['summary', 'overview', 'brief', 'highlights'],
+            'implementation': ['implement', 'execute', 'apply', 'build']
+        }
         
-        # Check business patterns
-        if any(pattern in content for pattern in business_patterns):
-            domain_boost += 2.0
+        if persona_context.job_intent in intent_keywords:
+            content_lower = content.lower()
+            intent_words = intent_keywords[persona_context.job_intent]
+            if any(word in content_lower for word in intent_words):
+                intent_boost = 1.0
         
-        # Check education patterns
-        if any(pattern in content for pattern in education_patterns):
-            domain_boost += 2.0
-        
-        # Medium boost for general high-value content
-        form_keywords = ["form", "fillable", "interactive", "fill", "sign", "signature"]
-        if any(keyword in content for keyword in form_keywords):
-            domain_boost += 0.5
-        
-        return min(15.0, domain_boost)  # Cap at 15.0
+        total_boost = persona_boost + job_keywords_boost + intent_boost
+        return min(10.0, total_boost)  # Cap at 10.0
     
     def filter_top_sections(self, ranked_sections: List[RankedSection], 
                            max_sections: int = 15,

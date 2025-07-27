@@ -1,0 +1,27 @@
+{
+    "challenge_info": {
+        "challenge_id": "round_1b_custom",
+        "test_case_name": "my_analysis",
+        "description": "Custom document analysis for my use case"
+    },
+    "documents": [
+        {
+            "filename": "document1.pdf",
+            "title": "First Document Title"
+        },
+        {
+            "filename": "document2.pdf",
+            "title": "Second Document Title"
+        },
+        {
+            "filename": "document3.pdf",
+            "title": "Third Document Title"
+        }
+    ],
+    "persona": {
+        "role": "Business Analyst"
+    },
+    "job_to_be_done": {
+        "task": "Extract key market trends and strategic recommendations from quarterly reports"
+    }
+}

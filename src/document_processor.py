@@ -363,23 +363,36 @@ class DocumentProcessor:
         """
         sections = []
         
-        # Enhanced heading patterns for Adobe Acrobat documentation
+        # Universal heading patterns that work across all domains
         heading_patterns = [
-            # Adobe-specific patterns
-            r'^([A-Z][a-z]+(?:\s+[a-z]+)*\s+(?:forms?|PDFs?|documents?|signatures?)\s+[a-z\s]*(?:\([^)]+\))?)\s*$',  # "Change flat forms to fillable (Acrobat Pro)"
-            r'^([A-Z][a-z]+\s+(?:multiple\s+)?PDFs?\s+[a-z\s]+)\s*$',  # "Create multiple PDFs from multiple files"
-            r'^([A-Z][a-z]+\s+(?:and\s+)?[a-z]+\s+PDF\s+[a-z]+)\s*$',  # "Fill and sign PDF forms"
-            r'^([A-Z][a-z]+\s+[a-z]+\s+(?:content\s+)?to\s+PDF)\s*$',  # "Convert clipboard content to PDF"
-            r'^([A-Z][a-z]+\s+a\s+document\s+[a-z\s]+)\s*$',  # "Send a document to get signatures"
+            # Numbered sections/headings
+            r'^\d+\.?\s+([A-Z][^.!?\n]{5,80})\s*$',  # "1. Introduction to..."
+            r'^(\d+(?:\.\d+)*\.?\s+[A-Z][^.!?\n]{5,80})\s*$',  # "1.1 Methodology"
             
-            # General patterns (existing)
-            r'^([A-Z][A-Z\s]{2,50})\s*$',  # ALL CAPS headings
-            r'^\d+\.?\s+([A-Z][^.!?\n]{5,80})\s*$',  # Numbered headings
-            r'^([A-Z][a-z\s]{3,50})(?:\s*$)',  # Title case headings
+            # ALL CAPS headings (common in many documents)
+            r'^([A-Z][A-Z\s]{2,50})\s*$',  # "METHODOLOGY AND APPROACH"
+            
+            # Title case headings
+            r'^([A-Z][a-z\s]{3,50})(?:\s*$)',  # "Introduction and Background"
+            
+            # Centered or standalone headings
             r'^\s*([A-Z][A-Z\s\-]{3,50})\s*$',  # Centered headings
             
-            # Adobe procedure patterns
-            r'^((?:To\s+)?[A-Z][a-z]+(?:\s+[a-z]+)*:?).*$',  # "To create...", "To fill..."
+            # Action/procedural patterns (universal)
+            r'^((?:How\s+to\s+|To\s+)?[A-Z][a-z]+(?:\s+[a-z]+)*[:\.]?)\s*$',  # "How to create...", "To implement..."
+            
+            # Topic-based patterns (flexible)
+            r'^([A-Z][a-z]+(?:\s+[a-z]+)*\s+(?:analysis|overview|guide|tutorial|introduction|conclusion|summary))\s*$',
+            
+            # Bullet or dash headings
+            r'^[\-\•\*]\s*([A-Z][a-z\s]{3,50})\s*$',  # "- Important Topic"
+            
+            # Question-based headings
+            r'^(What\s+(?:is|are)\s+[A-Z][a-z\s]{3,40}\??)\s*$',  # "What is Machine Learning?"
+            r'^(Why\s+[A-Z][a-z\s]{3,40}\??)\s*$',  # "Why Use This Method?"
+            
+            # General content patterns
+            r'^([A-Z][a-z]+(?:\s+[a-z]+){1,4})\s*$',  # Simple title patterns (2-5 words)
         ]
         
         text_lines = text.split('\n')
@@ -415,14 +428,15 @@ class DocumentProcessor:
         return sections
     
     def _is_valid_heading(self, heading_text: str, full_line: str) -> bool:
-        """Check if extracted text is a valid heading."""
+        """Check if extracted text is a valid heading - universal validation."""
         # Filter out common false positives
         invalid_patterns = [
             r'^\d+\s*$',  # Just numbers
             r'^[A-Z]\s*$',  # Single letters
-            r'^(and|or|the|of|in|on|at|to|for|with|by)\s',  # Starting with common words
+            r'^(and|or|the|of|in|on|at|to|for|with|by|a|an)\s',  # Starting with common words
             r'^\w+@\w+',  # Email addresses
             r'^https?://',  # URLs
+            r'^\s*[^\w\s]\s*$',  # Just punctuation
         ]
         
         heading_lower = heading_text.lower()
@@ -431,18 +445,24 @@ class DocumentProcessor:
             if re.match(pattern, heading_lower):
                 return False
         
-        # Check for Adobe-specific keywords that indicate good headings
-        adobe_keywords = [
-            'form', 'pdf', 'acrobat', 'sign', 'signature', 'create', 'convert', 
-            'export', 'edit', 'share', 'fill', 'document', 'interactive', 'fields'
-        ]
+        # Universal validation - should be reasonable length and format
+        if not (5 <= len(heading_text) <= 100):
+            return False
+            
+        # Should not end with a period (headings typically don't)
+        if heading_text.endswith('.') and not heading_text.endswith('...'):
+            return False
+            
+        # Should contain at least one meaningful word (more than 3 chars)
+        meaningful_words = [word for word in heading_text.split() if len(word) > 3]
+        if len(meaningful_words) < 1:
+            return False
+            
+        # Should not be all uppercase with more than 6 words (likely not a heading)
+        if heading_text.isupper() and len(heading_text.split()) > 6:
+            return False
         
-        # If it contains Adobe keywords, it's likely a good heading
-        if any(keyword in heading_lower for keyword in adobe_keywords):
-            return True
-        
-        # General validation - should be reasonable length and format
-        return 5 <= len(heading_text) <= 100 and not heading_text.endswith('.')
+        return True
         
     def _has_tables(self, page) -> bool:
         """Check if page contains tables."""

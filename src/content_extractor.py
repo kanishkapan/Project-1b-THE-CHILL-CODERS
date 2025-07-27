@@ -41,35 +41,34 @@ class ContentExtractor:
         self.max_section_length = 2000  # Maximum characters to extract per section
         self.min_relevance_threshold = 0.01  # Minimum relevance score to include
         
-        # Section type patterns
+        # Dynamic section type patterns - universal across domains
         self.section_patterns = {
             'abstract': [
-                r'abstract\b', r'summary\b', r'overview\b'
+                r'abstract\b', r'summary\b', r'overview\b', r'synopsis\b'
             ],
             'introduction': [
-                r'introduction\b', r'background\b', r'motivation\b'
+                r'introduction\b', r'background\b', r'motivation\b', r'overview\b', r'purpose\b'
             ],
             'methodology': [
-                r'method(?:ology)?\b', r'approach\b', r'technique\b', 
-                r'procedure\b', r'implementation\b'
+                r'method(?:ology)?\b', r'approach\b', r'technique\b', r'procedure\b', 
+                r'implementation\b', r'process\b', r'strategy\b'
             ],
             'results': [
-                r'results?\b', r'findings?\b', r'outcome\b', r'analysis\b'
+                r'results?\b', r'findings?\b', r'outcome\b', r'analysis\b', r'data\b', 
+                r'performance\b', r'evaluation\b'
             ],
             'discussion': [
-                r'discussion\b', r'interpretation\b', r'implications?\b'
+                r'discussion\b', r'interpretation\b', r'implications?\b', r'analysis\b',
+                r'evaluation\b', r'assessment\b'
             ],
             'conclusion': [
-                r'conclusion\b', r'summary\b', r'final\b', r'closing\b'
+                r'conclusion\b', r'summary\b', r'final\b', r'closing\b', r'recommendations?\b'
             ],
-            'literature_review': [
-                r'literature\s+review\b', r'related\s+work\b', r'prior\s+work\b'
+            'content': [
+                r'content\b', r'details?\b', r'information\b', r'description\b', r'explanation\b'
             ],
-            'financial': [
-                r'financial\b', r'revenue\b', r'profit\b', r'income\b', r'expense\b'
-            ],
-            'technical': [
-                r'technical\b', r'specification\b', r'architecture\b', r'design\b'
+            'general': [
+                r'important\b', r'key\b', r'main\b', r'primary\b', r'essential\b', r'critical\b'
             ]
         }
     
@@ -292,24 +291,30 @@ class ContentExtractor:
             if score > 0:
                 theme_scores[theme] = score
         
-        # Sort themes by relevance to persona and content
-        if theme_scores:
-            # Boost themes relevant to persona
-            persona_role = persona_context.role.lower()
+        # Dynamic relevance boosting based on persona context
+        if theme_scores and persona_context:
+            # Use persona priority topics to boost relevant themes
+            for priority_topic in persona_context.priority_topics:
+                topic_lower = priority_topic.lower()
+                
+                # Boost themes that match priority topics
+                for theme, keywords in theme_patterns.items():
+                    if any(keyword in topic_lower for keyword in keywords):
+                        theme_scores[theme] = theme_scores.get(theme, 0) * 1.5
+                        
+            # Boost themes based on job intent
+            intent_boost = {
+                'analysis': ['analysis', 'results', 'data'],
+                'preparation': ['planning', 'guidelines', 'overview', 'practical'],
+                'comprehensive_review': ['methodology', 'analysis', 'results'],
+                'implementation': ['implementation', 'technical', 'practical'],
+                'extraction': ['data', 'analysis', 'methodology']
+            }
             
-            if 'research' in persona_role:
-                theme_scores['methodology'] = theme_scores.get('methodology', 0) * 1.5
-                theme_scores['analysis'] = theme_scores.get('analysis', 0) * 1.3
-                theme_scores['results'] = theme_scores.get('results', 0) * 1.3
-            
-            elif 'business' in persona_role or 'analyst' in persona_role:
-                theme_scores['business'] = theme_scores.get('business', 0) * 1.5
-                theme_scores['analysis'] = theme_scores.get('analysis', 0) * 1.3
-            
-            elif 'travel' in persona_role or 'planner' in persona_role:
-                theme_scores['activities'] = theme_scores.get('activities', 0) * 1.5
-                theme_scores['planning'] = theme_scores.get('planning', 0) * 1.3
-                theme_scores['practical'] = theme_scores.get('practical', 0) * 1.3
+            if persona_context.job_intent in intent_boost:
+                for theme in intent_boost[persona_context.job_intent]:
+                    if theme in theme_scores:
+                        theme_scores[theme] = theme_scores.get(theme, 0) * 1.3
             
             # Return top themes
             sorted_themes = sorted(theme_scores.items(), key=lambda x: x[1], reverse=True)

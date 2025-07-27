@@ -44,24 +44,24 @@ class PersonaAnalyzer:
         )
         self._load_models()
         
-        # Domain-specific keyword mappings
-        self.domain_keywords = {
-            'research': ['methodology', 'literature', 'analysis', 'study', 'findings', 'results', 'conclusion'],
-            'business': ['revenue', 'strategy', 'market', 'performance', 'growth', 'analysis', 'trends'],
-            'education': ['concepts', 'principles', 'examples', 'exercises', 'theory', 'practice', 'learning'],
-            'technical': ['implementation', 'architecture', 'specifications', 'documentation', 'procedures'],
-            'finance': ['financial', 'investment', 'returns', 'risk', 'portfolio', 'market', 'analysis'],
-            'food': ['vegetarian', 'vegan', 'gluten-free', 'ingredients', 'recipe', 'menu', 'buffet', 'dinner', 'cooking', 'preparation', 'dietary', 'nutrition', 'catering', 'corporate', 'gathering']
+        # Dynamic domain keyword extraction - no hardcoded domains
+        self.common_stopwords = {
+            'the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by',
+            'a', 'an', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had',
+            'do', 'does', 'did', 'will', 'would', 'could', 'should', 'may', 'might', 'must',
+            'this', 'that', 'these', 'those', 'here', 'there', 'where', 'when', 'why', 'how'
         }
         
-        # Job intent patterns
+        # Dynamic job intent patterns - flexible for any domain
         self.intent_patterns = {
-            'comprehensive_review': ['comprehensive', 'complete', 'thorough', 'detailed', 'full'],
-            'summary': ['summarize', 'overview', 'brief', 'key points', 'main'],
-            'comparison': ['compare', 'contrast', 'versus', 'difference', 'similar'],
-            'analysis': ['analyze', 'examine', 'evaluate', 'assess', 'investigate'],
-            'extraction': ['extract', 'identify', 'find', 'locate', 'list'],
-            'preparation': ['prepare', 'study', 'learn', 'understand', 'review']
+            'comprehensive_review': ['comprehensive', 'complete', 'thorough', 'detailed', 'full', 'extensive', 'in-depth'],
+            'summary': ['summarize', 'overview', 'brief', 'key points', 'main', 'highlights', 'synopsis'],
+            'comparison': ['compare', 'contrast', 'versus', 'difference', 'similar', 'evaluate', 'assessment'],
+            'analysis': ['analyze', 'examine', 'evaluate', 'assess', 'investigate', 'study', 'research'],
+            'extraction': ['extract', 'identify', 'find', 'locate', 'list', 'collect', 'gather'],
+            'preparation': ['prepare', 'study', 'learn', 'understand', 'review', 'plan', 'develop', 'create', 'design'],
+            'implementation': ['implement', 'execute', 'apply', 'build', 'construct', 'develop'],
+            'optimization': ['optimize', 'improve', 'enhance', 'maximize', 'minimize', 'streamline']
         }
     
     def _load_models(self):
@@ -157,39 +157,53 @@ class PersonaAnalyzer:
         return "Professional"
     
     def _extract_domain(self, persona: str) -> str:
-        """Extract the domain/field from persona description."""
-        # Domain keywords mapping
-        domain_mapping = {
-            'research': ['research', 'academic', 'scientific', 'study'],
-            'business': ['business', 'financial', 'investment', 'corporate', 'commercial'],
-            'education': ['education', 'student', 'learning', 'academic', 'school', 'university'],
-            'technical': ['technical', 'engineering', 'software', 'computer', 'technology'],
-            'medical': ['medical', 'healthcare', 'clinical', 'pharmaceutical', 'biology'],
-            'finance': ['finance', 'banking', 'investment', 'economic', 'financial'],
-            'food': ['food', 'culinary', 'chef', 'cooking', 'catering', 'contractor', 'menu', 'restaurant', 'kitchen', 'recipe']
-        }
+        """Extract the domain/field from persona description using dynamic NLP."""
+        if not persona.strip():
+            return "general"
+            
+        # Extract meaningful keywords from persona using NLP
+        domain_keywords = self._extract_domain_keywords(persona)
         
-        persona_lower = persona.lower()
+        if domain_keywords:
+            # Return the most prominent domain keyword as the domain
+            return domain_keywords[0].lower()
         
-        for domain, keywords in domain_mapping.items():
-            if any(keyword in persona_lower for keyword in keywords):
-                return domain
-        
-        # Try to extract specific field mentions
+        # Fallback: extract specific field mentions using patterns
         field_patterns = [
             r'in\s+([a-zA-Z\s]+?)(?:\s|$)',
             r'of\s+([a-zA-Z\s]+?)(?:\s|$)',
-            r'([a-zA-Z]+)\s+(?:researcher|analyst|student)'
+            r'([a-zA-Z]+)\s+(?:specialist|expert|professional|analyst|researcher|student|manager|director)'
         ]
         
+        persona_lower = persona.lower()
         for pattern in field_patterns:
             match = re.search(pattern, persona_lower)
             if match:
                 field = match.group(1).strip()
-                if len(field.split()) <= 3:  # Reasonable field name length
-                    return field.title()
+                if len(field.split()) <= 3 and len(field) > 2:  # Reasonable field name
+                    return field.replace(' ', '_')
         
         return "general"
+    
+    def _extract_domain_keywords(self, text: str) -> List[str]:
+        """Extract domain-specific keywords using NLP."""
+        keywords = []
+        
+        if self.nlp:
+            doc = self.nlp(text)
+            # Extract nouns, proper nouns, and adjectives that could indicate domain
+            for token in doc:
+                if (token.pos_ in ['NOUN', 'PROPN', 'ADJ'] and 
+                    len(token.text) > 2 and 
+                    token.text.lower() not in self.common_stopwords and
+                    not token.is_punct and not token.is_space):
+                    keywords.append(token.lemma_)
+        else:
+            # Fallback: simple word extraction
+            words = re.findall(r'\b[a-zA-Z]{3,}\b', text)
+            keywords = [word for word in words if word.lower() not in self.common_stopwords]
+        
+        return keywords[:5]  # Return top 5 keywords
     
     def _extract_expertise_areas(self, persona: str) -> List[str]:
         """Extract specific expertise areas from persona."""
@@ -267,46 +281,65 @@ class PersonaAnalyzer:
         return list(set(keywords))[:20]
     
     def _determine_priority_topics(self, persona: str, job_description: str, domain: str) -> List[str]:
-        """Determine priority topics based on persona and job."""
+        """Determine priority topics dynamically from persona and job description."""
         priority_topics = []
         
-        # Add domain-specific keywords
-        if domain in self.domain_keywords:
-            priority_topics.extend(self.domain_keywords[domain])
-        
-        # Extract specific topics from job description
+        # Extract keywords directly from the combined text using NLP
         combined_text = f"{persona} {job_description}"
-        keywords = extract_keywords(combined_text, max_keywords=10)
-        priority_topics.extend(keywords)
         
-        # Remove duplicates
-        return list(set(priority_topics))[:15]
+        if self.nlp:
+            doc = self.nlp(combined_text)
+            
+            # Extract important nouns and entities
+            for token in doc:
+                if (token.pos_ in ['NOUN', 'PROPN'] and 
+                    len(token.text) > 2 and
+                    token.text.lower() not in self.common_stopwords and
+                    not token.is_punct and not token.is_space):
+                    priority_topics.append(token.lemma_.lower())
+            
+            # Extract named entities
+            for ent in doc.ents:
+                if ent.label_ in ['PERSON', 'ORG', 'PRODUCT', 'TECHNOLOGY', 'NORP']:
+                    priority_topics.append(ent.text.lower())
+            
+            # Extract noun phrases
+            for chunk in doc.noun_chunks:
+                if 2 <= len(chunk.text.split()) <= 3:
+                    priority_topics.append(chunk.text.lower())
+        
+        # Fallback: use keyword extraction utility
+        keywords = extract_keywords(combined_text, max_keywords=15)
+        priority_topics.extend([kw.lower() for kw in keywords])
+        
+        # Remove duplicates and filter out very short terms
+        unique_topics = list(set(priority_topics))
+        filtered_topics = [topic for topic in unique_topics if len(topic) > 2]
+        
+        return filtered_topics[:20]  # Return top 20 priority topics
     
     def _identify_relevant_sections(self, job_intent: str, domain: str) -> List[str]:
-        """Identify types of sections that are most relevant."""
+        """Identify types of sections that are most relevant based on job intent."""
+        # Base section mapping - these are universal across domains
         section_mapping = {
-            'comprehensive_review': ['methodology', 'results', 'discussion', 'conclusion', 'introduction'],
-            'summary': ['abstract', 'summary', 'conclusion', 'key findings', 'overview'],
-            'comparison': ['results', 'analysis', 'comparison', 'evaluation', 'performance'],
-            'analysis': ['analysis', 'results', 'data', 'findings', 'discussion'],
-            'extraction': ['methodology', 'approach', 'implementation', 'procedure'],
-            'preparation': ['introduction', 'background', 'concepts', 'principles', 'theory']
+            'comprehensive_review': ['methodology', 'results', 'discussion', 'conclusion', 'introduction', 'analysis'],
+            'summary': ['abstract', 'summary', 'conclusion', 'key findings', 'overview', 'highlights'],
+            'comparison': ['results', 'analysis', 'comparison', 'evaluation', 'performance', 'assessment'],
+            'analysis': ['analysis', 'results', 'data', 'findings', 'discussion', 'evaluation'],
+            'extraction': ['methodology', 'approach', 'implementation', 'procedure', 'methods', 'techniques'],
+            'preparation': ['introduction', 'background', 'concepts', 'principles', 'theory', 'fundamentals'],
+            'implementation': ['procedure', 'steps', 'process', 'implementation', 'execution', 'application'],
+            'optimization': ['improvement', 'optimization', 'enhancement', 'performance', 'efficiency']
         }
         
+        # Get base relevant sections for the job intent
         relevant_sections = section_mapping.get(job_intent, ['introduction', 'results', 'conclusion'])
         
-        # Add domain-specific sections
-        domain_sections = {
-            'research': ['literature review', 'methodology', 'results', 'discussion'],
-            'business': ['executive summary', 'financial analysis', 'market analysis', 'strategy'],
-            'education': ['concepts', 'examples', 'exercises', 'summary'],
-            'technical': ['specifications', 'implementation', 'architecture', 'procedures']
-        }
+        # Add universal section types that are generally useful
+        universal_sections = ['overview', 'summary', 'key points', 'important', 'main', 'primary']
+        relevant_sections.extend(universal_sections)
         
-        if domain in domain_sections:
-            relevant_sections.extend(domain_sections[domain])
-        
-        return list(set(relevant_sections))
+        return list(set(relevant_sections))[:15]  # Limit to 15 most relevant section types
     
     def _determine_analysis_depth(self, job_description: str) -> str:
         """Determine the required depth of analysis."""
