@@ -10,10 +10,10 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
-COPY requirements-cpu.txt .
+COPY requirements.txt .
 
-# Install Python dependencies (CPU only for speed)
-RUN pip install --no-cache-dir -r requirements-cpu.txt
+# Install Python dependencies (CPU only, minimal dependencies)
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Download spaCy model
 RUN python -m spacy download en_core_web_sm

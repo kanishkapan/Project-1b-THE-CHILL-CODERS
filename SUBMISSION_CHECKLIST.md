@@ -158,7 +158,7 @@ ls output/create_manageable_forms_output.json
 ### **Configuration Files**
 ```
 ├── requirements.txt          # Python dependencies
-├── requirements-cpu.txt      # CPU-only optimized dependencies
+├── requirements.txt              # Minimal dependencies (CPU-only, <200MB)
 ├── Dockerfile               # Container configuration
 ├── Dockerfile-cpu          # CPU-optimized container
 ```

@@ -506,44 +506,151 @@ class OutputGenerator:
         return text[:max_length-3] + "..."
     
     def _generate_refined_text(self, section: RankedSection) -> str:
-        """Generate refined and cleaned text for detailed analysis."""
+        """
+        Enhanced refined text generation for better subsection analysis.
+        
+        Improvements for F1 score:
+        - Extracts actionable content more effectively
+        - Provides more detailed analysis
+        - Filters out generic/filler content
+        - Focuses on specific, useful information
+        """
         content = section.content
+        title = section.section_title
         
-        # Basic text refinement
-        # Remove excessive whitespace
+        # IMPROVEMENT 1: Advanced text cleaning and preparation
         import re
-        content = re.sub(r'\s+', ' ', content)
         
-        # Remove common artifacts
+        # Remove excessive whitespace and clean formatting
+        content = re.sub(r'\s+', ' ', content)
         content = re.sub(r'\b\d+\s*$', '', content)  # Page numbers at end
         content = re.sub(r'^\s*\d+\s*', '', content)  # Numbers at start
+        content = re.sub(r'\([^)]*\)$', '', content)  # Remove trailing parentheses
+        content = content.strip()
         
-        # Focus on key sentences (simple extractive summarization)
-        sentences = content.split('.')
+        # IMPROVEMENT 2: Intelligent sentence extraction
+        sentences = [s.strip() for s in re.split(r'[.!?]+', content) if s.strip()]
         
-        # Score sentences by keyword presence
-        key_words = set(word.lower() for word in section.key_concepts)
-        scored_sentences = []
+        # IMPROVEMENT 3: Advanced sentence scoring for actionable content
+        def score_sentence(sentence):
+            score = 0
+            sentence_lower = sentence.lower()
+            
+            # High value indicators
+            actionable_indicators = [
+                'how to', 'step', 'process', 'method', 'technique', 'approach',
+                'create', 'build', 'implement', 'use', 'apply', 'configure',
+                'setup', 'install', 'enable', 'disable', 'activate', 'click',
+                'select', 'choose', 'enter', 'type', 'navigate', 'access'
+            ]
+            
+            specific_content = [
+                'example', 'for instance', 'such as', 'including', 'specifically',
+                'feature', 'capability', 'function', 'option', 'tool', 'button',
+                'result', 'outcome', 'benefit', 'advantage', 'solution',
+                'recommendation', 'best practice', 'tip', 'note', 'important'
+            ]
+            
+            instructional_content = [
+                'to do this', 'follow these', 'complete the', 'finish the',
+                'required', 'necessary', 'must', 'should', 'need to',
+                'recommended', 'suggested', 'advised', 'ensure', 'make sure'
+            ]
+            
+            # Score based on content type
+            for indicator in actionable_indicators:
+                if indicator in sentence_lower:
+                    score += 3  # High score for actionable content
+            
+            for indicator in specific_content:
+                if indicator in sentence_lower:
+                    score += 2  # Medium score for specific content
+                    
+            for indicator in instructional_content:
+                if indicator in sentence_lower:
+                    score += 2  # Medium score for instructional content
+            
+            # Bonus for key concepts from section
+            if hasattr(section, 'key_concepts') and section.key_concepts:
+                concept_matches = sum(1 for concept in section.key_concepts 
+                                    if concept.lower() in sentence_lower)
+                score += concept_matches
+            
+            # Length considerations - favor substantial sentences
+            word_count = len(sentence.split())
+            if 8 <= word_count <= 40:  # Optimal length
+                score += 1
+            elif word_count > 40:  # Too long, slight penalty
+                score -= 0.5
+            elif word_count < 5:  # Too short, penalty
+                score -= 1
+            
+            # Penalize generic/filler content
+            generic_phrases = [
+                'this section', 'as mentioned', 'as discussed', 'in general',
+                'it should be noted', 'it is important', 'please note',
+                'furthermore', 'moreover', 'in addition', 'however',
+                'therefore', 'thus', 'hence', 'consequently'
+            ]
+            
+            for phrase in generic_phrases:
+                if phrase in sentence_lower:
+                    score -= 1
+            
+            return max(0, score)  # Ensure non-negative
         
-        for sentence in sentences:
-            if len(sentence.strip()) > 20:  # Skip very short sentences
-                score = sum(1 for word in key_words if word in sentence.lower())
-                scored_sentences.append((sentence.strip(), score))
+        # IMPROVEMENT 4: Score and rank sentences
+        scored_sentences = [(sentence, score_sentence(sentence)) 
+                          for sentence in sentences if len(sentence) > 15]
         
-        # Take top sentences or all if few
-        if len(scored_sentences) > 3:
-            scored_sentences.sort(key=lambda x: x[1], reverse=True)
-            refined_sentences = [s[0] for s in scored_sentences[:3]]
+        # Sort by score, keep best sentences
+        scored_sentences.sort(key=lambda x: x[1], reverse=True)
+        
+        # IMPROVEMENT 5: Select optimal number of sentences
+        if len(scored_sentences) > 5:
+            # Take top 3-4 sentences for detailed content
+            selected_sentences = [s[0] for s in scored_sentences[:4]]
+        elif len(scored_sentences) > 2:
+            # Take top 2-3 for medium content
+            selected_sentences = [s[0] for s in scored_sentences[:3]]
         else:
-            refined_sentences = [s[0] for s in scored_sentences]
+            # Take all available for sparse content
+            selected_sentences = [s[0] for s in scored_sentences]
         
-        refined_text = '. '.join(refined_sentences)
+        # IMPROVEMENT 6: Ensure we have meaningful content
+        if not selected_sentences:
+            # Fallback: take first substantial sentences from original content
+            fallback_sentences = [s.strip() for s in sentences[:2] 
+                                if len(s.strip()) > 20]
+            selected_sentences = fallback_sentences
         
-        # Truncate if too long
+        # IMPROVEMENT 7: Construct refined text with better flow
+        if selected_sentences:
+            refined_text = ' • '.join(selected_sentences)  # Use bullet format for clarity
+            
+            # Add context from title if it's descriptive
+            if (len(title) > 5 and 
+                title not in ['Full Page Content', 'General', 'Introduction'] and
+                not any(generic in title.lower() for generic in ['methodology', 'approach', 'overview'])):
+                refined_text = f"{title}: {refined_text}"
+        else:
+            # Final fallback
+            refined_text = content[:self.max_refined_text_length]
+        
+        # IMPROVEMENT 8: Final length management with smart truncation
         if len(refined_text) > self.max_refined_text_length:
-            refined_text = refined_text[:self.max_refined_text_length-3] + "..."
+            # Try to truncate at sentence boundary
+            truncate_pos = self.max_refined_text_length - 3
+            last_period = refined_text.rfind('.', 0, truncate_pos)
+            last_bullet = refined_text.rfind('•', 0, truncate_pos)
+            
+            best_break = max(last_period, last_bullet)
+            if best_break > self.max_refined_text_length * 0.7:  # If we find good break point
+                refined_text = refined_text[:best_break + 1]
+            else:
+                refined_text = refined_text[:truncate_pos] + "..."
         
-        return refined_text if refined_text else content[:self.max_refined_text_length]
+        return refined_text if refined_text.strip() else content[:self.max_refined_text_length]
     
     def _calculate_methodology_relevance(self, section: RankedSection) -> float:
         """Calculate methodology relevance score for the section."""

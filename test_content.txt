@@ -1,0 +1,21 @@
+# Test Document 1
+
+## How to Create Fillable Forms
+
+To create an interactive form, use the Prepare Forms tool. See Create a form from an existing document.
+
+You can enable the Fill & Sign tools by going to File menu and choosing Save As Other > Acrobat Reader Extended PDF > Enable More Tools.
+
+Interactive forms contain fields that you can select and fill in. Flat forms do not have interactive fields.
+
+## Converting Multiple Files
+
+Create multiple PDFs from multiple files by selecting the files you want to convert and using the batch processing feature.
+
+This allows you to convert several documents at once, saving time and ensuring consistency across your document collection.
+
+## Digital Signatures
+
+Send a document to get signatures from others by using the Request E-signatures feature.
+
+Open the PDF form in Acrobat, choose All tools > Request E-signatures, and add recipient email addresses in the order you want the document to be signed.

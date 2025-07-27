@@ -1,0 +1,11 @@
+📁 Place your PDF documents here for analysis.
+
+The system supports any PDF files:
+- Research papers
+- Business reports  
+- Academic documents
+- Financial reports
+- Technical manuals
+- Any other PDF content
+
+Just copy your PDF files into this folder and update the input JSON file accordingly.
