@@ -1,14 +1,58 @@
 # Docker Execution Instructions for Document Intelligence System
 
+## Quick Start Guide
+
+### 🚀 One-Command Execution (Recommended)
+
+Simply run the PowerShell script to build and execute everything automatically:
+
+```powershell
+# Navigate to project directory
+cd "g:\IET DAVV\hackethon\adobe\project 1b final\Project-1b-copilot"
+
+# Run with automatic detection (uses input_template.json if available)
+.\run_docker.ps1
+
+# Or run specific test cases
+.\run_docker.ps1 -TestCase academic
+.\run_docker.ps1 -TestCase business  
+.\run_docker.ps1 -TestCase student
+.\run_docker.ps1 -TestCase forms
+
+# Or run with custom persona/job
+.\run_docker.ps1 -Persona "Data Scientist" -Job "Extract key insights from research data"
+```
+
+### 📂 Input Setup
+
+The system supports two input methods:
+
+1. **JSON Template Input** (Recommended for hackathon submissions):
+   - Edit `input_template.json` with your persona and job requirements
+   - Add PDF files to `sample_docs/` directory
+   - Run `.\run_docker.ps1` - it will automatically detect and use the JSON
+
+2. **Command Line Input**:
+   - Add PDF files to `sample_docs/` directory  
+   - Use parameters: `.\run_docker.ps1 -Persona "Your Role" -Job "Your Task"`
+
+### 🔄 Dynamic Usage (No Rebuild Required)
+
+**Key Feature**: You can change inputs without rebuilding the Docker image!
+
+1. **Change Documents**: Simply replace PDF files in `sample_docs/` folder
+2. **Change Persona/Job**: Edit `input_template.json` or use different parameters
+3. **Re-run**: Execute `.\run_docker.ps1` again - uses existing Docker image
+
 ## Building the Docker Image
 
 ### 1. Build the Image
 ```bash
-# Navigate to project directory
-cd "g:\IET DAVV\hackethon\adobe\Project 1b-copilot"
-
-# Build the Docker image
+# Manual build (if needed)
 docker build -t doc-intelligence .
+
+# Build only (without running)
+.\run_docker.ps1 -BuildOnly $true
 
 # Verify image was created
 docker images | grep doc-intelligence
@@ -20,155 +64,86 @@ docker images | grep doc-intelligence
 docker build -t adobe-hackathon-1b:latest .
 ```
 
-## Running the Docker Container
+## Manual Docker Commands (Advanced)
 
-### 1. Basic Run (Default Persona)
-```bash
-# Run with default settings
-docker run --rm -v "$(pwd)/sample_docs:/app/documents" -v "$(pwd)/output:/app/output" doc-intelligence
+### 1. With JSON Input Template
+```powershell
+# Windows PowerShell - Automatic JSON detection
+docker run --rm `
+    -v "${PWD}/sample_docs:/app/documents" `
+    -v "${PWD}:/app/input" `
+    -v "${PWD}/output:/app/output" `
+    doc-intelligence
 
-# For Windows PowerShell
-docker run --rm -v "${PWD}/sample_docs:/app/documents" -v "${PWD}/output:/app/output" doc-intelligence
-```
-
-### 2. Custom Persona and Job
-```bash
-# Academic Research Example
+# Linux/Mac - Automatic JSON detection  
 docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --persona "PhD Researcher in Computational Biology" \
-  --job "Prepare comprehensive literature review focusing on methodologies, datasets, and performance benchmarks"
+    -v "$(pwd)/sample_docs:/app/documents" \
+    -v "$(pwd):/app/input" \
+    -v "$(pwd)/output:/app/output" \
+    doc-intelligence
+```
 
-# Business Analysis Example  
+### 2. With Command Line Arguments
+```powershell
+# Windows PowerShell - Custom persona/job
+docker run --rm `
+    -v "${PWD}/sample_docs:/app/documents" `
+    -v "${PWD}/output:/app/output" `
+    doc-intelligence `
+    python main.py `
+    --documents_dir /app/documents `
+    --output_dir /app/output `
+    --persona "Investment Analyst" `
+    --job "Analyze revenue trends and market positioning"
+
+# Linux/Mac - Custom persona/job
 docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --persona "Investment Analyst" \
-  --job "Analyze revenue trends, R&D investments, and market positioning strategies"
-
-# Educational Content Example
-docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --persona "Undergraduate Chemistry Student" \
-  --job "Identify key concepts and mechanisms for exam preparation on reaction kinetics"
+    -v "$(pwd)/sample_docs:/app/documents" \
+    -v "$(pwd)/output:/app/output" \
+    doc-intelligence \
+    python main.py \
+    --documents_dir /app/documents \
+    --output_dir /app/output \
+    --persona "Investment Analyst" \
+    --job "Analyze revenue trends and market positioning"
 ```
 
-### 3. Interactive Mode (for Testing)
-```bash
-# Run container interactively
-docker run -it --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence bash
-
-# Inside container, you can run:
-python main.py --documents_dir /app/documents --persona "Your Persona" --job "Your Job"
-python test_system.py
-python demo.py
-```
-
-## Testing the Docker System
-
-### 1. Prepare Test Documents
-```bash
-# Create test documents directory
-mkdir -p sample_docs
-
-# Add your PDF files to sample_docs/
-# Example structure:
-# sample_docs/
-# ├── research_paper_1.pdf
-# ├── business_report_2023.pdf
-# ├── technical_documentation.pdf
-# └── educational_content.pdf
-```
-
-### 2. Run System Tests
-```bash
-# Test with multiple documents
-docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python test_system.py
-
-# Test with demo script
-docker run -it --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python demo.py
-```
-
-### 3. Verify Output
-```bash
-# Check generated output files
-ls -la output/
-cat output/results.json
-
-# Verify constraint compliance
-# - Processing time < 60 seconds ✓
-# - CPU-only execution ✓  
-# - No internet access ✓
-# - Model size < 1GB ✓
-```
-
-## Hackathon Submission Commands
+## Hackathon Test Cases
 
 ### Test Case 1: Academic Research
-```bash
-docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --output_file "test_case_1_results.json" \
-  --persona "PhD Researcher in Computational Biology" \
-  --job "Prepare a comprehensive literature review focusing on methodologies, datasets, and performance benchmarks"
+```powershell
+# Using JSON template (recommended)
+# Edit input_template.json to set:
+# - persona.role: "PhD Researcher in Computational Biology" 
+# - job_to_be_done.task: "Prepare comprehensive literature review..."
+.\run_docker.ps1 -TestCase academic
+
+# Or direct command:
+.\run_docker.ps1 -Persona "PhD Researcher in Computational Biology" -Job "Prepare a comprehensive literature review focusing on methodologies, datasets, and performance benchmarks"
 ```
 
 ### Test Case 2: Business Analysis  
-```bash
-docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --output_file "test_case_2_results.json" \
-  --persona "Investment Analyst" \
-  --job "Analyze revenue trends, R&D investments, and market positioning strategies"
+```powershell
+# Using predefined test case
+.\run_docker.ps1 -TestCase business
+
+# Or direct command:
+.\run_docker.ps1 -Persona "Investment Analyst" -Job "Analyze revenue trends, R&D investments, and market positioning strategies"
 ```
 
 ### Test Case 3: Educational Content
-```bash
-docker run --rm \
-  -v "$(pwd)/sample_docs:/app/documents" \
-  -v "$(pwd)/output:/app/output" \
-  doc-intelligence \
-  python main.py \
-  --documents_dir /app/documents \
-  --output_dir /app/output \
-  --output_file "test_case_3_results.json" \
-  --persona "Undergraduate Chemistry Student" \
-  --job "Identify key concepts and mechanisms for exam preparation on reaction kinetics"
+```powershell
+# Using predefined test case
+.\run_docker.ps1 -TestCase student
+
+# Or direct command:
+.\run_docker.ps1 -Persona "Undergraduate Chemistry Student" -Job "Identify key concepts and mechanisms for exam preparation on reaction kinetics"
+```
+
+### Test Case 4: Forms Management (JSON Template)
+```powershell
+# This automatically uses the input_template.json provided
+.\run_docker.ps1 -TestCase forms
 ```
 
 ## Performance Monitoring

@@ -1,11 +1,40 @@
-📁 Place your PDF documents here for analysis.
+📁 DOCUMENT INPUT DIRECTORY - PLACE YOUR PDF FILES HERE
 
-The system supports any PDF files:
-- Research papers
-- Business reports  
-- Academic documents
-- Financial reports
-- Technical manuals
-- Any other PDF content
+🎯 Adobe Hackathon 1B - Document Intelligence System
+Theme: "Connect What Matters — For the User Who Matters"
 
-Just copy your PDF files into this folder and update the input JSON file accordingly.
+## How to Use:
+1. Add 3-10 PDF documents to this directory
+2. Edit input_template.json with your persona and job requirements (optional)
+3. Run: .\run_docker.ps1
+
+## Supported Document Types:
+✅ Research papers and academic articles
+✅ Business reports and financial statements  
+✅ Educational content and textbooks
+✅ Technical documentation and manuals
+✅ News articles and whitepapers
+✅ Any domain-specific PDF content
+
+## Example Directory Structure:
+sample_docs/
+├── research_paper_1.pdf
+├── annual_report_2023.pdf
+├── chemistry_textbook_ch5.pdf
+├── technical_manual.pdf
+└── business_analysis.pdf
+
+## Quick Start:
+- For hackathon test case: Use provided input_template.json
+- For custom analysis: Run .\run_docker.ps1 -Persona "Your Role" -Job "Your Task"
+- For predefined tests: Run .\run_docker.ps1 -TestCase academic|business|student|forms
+
+## Constraints (automatically handled):
+⚡ Processing time: ≤ 60 seconds
+🖥️ CPU-only execution (no GPU required)
+💾 Model size: ≤ 1GB  
+🔒 No internet access during execution
+
+The system will automatically process all PDF files in this directory!
+
+🚀 Ready for submission - just add your PDFs and run!
