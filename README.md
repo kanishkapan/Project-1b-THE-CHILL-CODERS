@@ -8,7 +8,7 @@
 
 ## 🚀 Quick Start Guide (Choose One Method)
 
-### **Method 1: Python Setup (Fast - 2 minutes)**
+### **Method 1: Python Setup (Fast)**
 ```bash
 # Complete Python setup and execution
 git clone https://github.com/kanishkapan/Project-1b-copilot.git
@@ -21,61 +21,46 @@ python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt 
 python3 -m venv venv && source venv/bin/activate && pip install -r requirements.txt && python -m spacy download en_core_web_sm && python main.py --input_json input_template.json
 ```
 
-### **Method 2: Docker Setup (Production - 15 minutes)**
+### **Method 2: Docker Setup (Production)**
 ```bash
 # Complete Docker setup and execution
 git clone https://github.com/kanishkapan/Project-1b-copilot.git
 cd Project-1b-copilot
 
-# Build image (once - 15 minutes)
+# Build image (one-time setup)
 docker build -t doc-intelligence .
 
-# Run processing (6-25 seconds) - Windows PowerShell
+# Run processing - Windows PowerShell
 docker run --rm -v "${PWD}/sample_docs:/app/documents" -v "${PWD}:/app/input" -v "${PWD}/output:/app/output" doc-intelligence
 
-# Run processing (6-25 seconds) - Linux/Mac
+# Run processing - Linux/Mac
 docker run --rm -v "$(pwd)/sample_docs:/app/documents" -v "$(pwd):/app/input" -v "$(pwd)/output:/app/output" doc-intelligence
 ```
 
 ### **📋 Expected Results**
-- **Processing Time**: 6-25 seconds  
 - **Output File**: `output/travel_planner_output.json` (or similar)
-- **Sections Extracted**: 15+ relevant sections
+- **Sections Extracted**: Multiple relevant sections based on persona
 - **Constraints Met**: CPU-only, <1GB memory, <60s, offline
 
 ---
 
 ## 🎯 Project Overview
 
-**Award-winning domain-agnostic document intelligence platform** that extracts and ranks relevant content from PDF documents based on user personas and job requirements. Built for Adobe Hackathon Round 1B with **proven F1 Score of 60%** and lightning-fast processing speed.
-
-### 🏅 Key Achievements
-- ✅ **60% F1 Score** on diverse test cases  
-- ⚡ **6-25 second processing** (well under 60s constraint)
-- 🌍 **Universal domain support** (Travel, Food, Tech, HR, Academic, Legal)
-- 🧠 **79+ sections extracted** with intelligent ranking
-- 💾 **<1GB memory usage** with CPU-only execution
+**Domain-agnostic document intelligence platform** that extracts and ranks relevant content from PDF documents based on user personas and job requirements. Built for Adobe Hackathon Round 1B.
 
 ---
 
-## 📊 Performance Benchmarks
+## 📊 Adobe Hackathon Compliance
 
-### **Adobe Hackathon Compliance**
-| Constraint | Requirement | ✅ Status | Actual Performance |
-|------------|-------------|-----------|-------------------|
-| Processing Time | ≤ 60 seconds | **PASSED** | 6-25 seconds |
-| Memory Usage | ≤ 1GB | **PASSED** | ~800MB peak |
-| CPU-Only | No GPU dependencies | **PASSED** | Pure CPU execution |
-| Offline Mode | No internet access | **PASSED** | Fully offline |
-| Document Variety | 3-10 diverse types | **PASSED** | Tested 15+ types |
+### **Technical Requirements Met**
+| Constraint | Requirement | ✅ Status |
+|------------|-------------|-----------|
+| Processing Time | ≤ 60 seconds | **COMPLIANT** |
+| Memory Usage | ≤ 1GB | **COMPLIANT** |
+| CPU-Only | No GPU dependencies | **COMPLIANT** |
+| Offline Mode | No internet access | **COMPLIANT** |
+| Document Variety | 3-10 diverse types | **COMPLIANT** |
 
-### **Verified Test Results**
-| Test Case | Domain | F1 Score | Processing Time | Sections Extracted |
-|-----------|---------|----------|-----------------|-------------------|
-| Travel Planning | Travel & Tourism | 60% | 6.89s | 79 sections |
-| Food Contractor | Food & Beverage | 60% | 18.2s | 283 sections |
-| HR Forms | Adobe/Technology | 60% | 24.2s | 283 sections |
-| **Average** | **Multi-Domain** | **60%** | **16.43s** | **215 sections** |
 
 ---
 
@@ -162,23 +147,21 @@ Project-1b-copilot/                    # 👈 YOU ARE HERE (ROOT DIRECTORY)
       "document": "document.pdf",
       "section_title": "Descriptive Section Title",
       "importance_rank": 1,
-      "page_number": 12,
-      "confidence_score": 0.95
+      "page_number": 12
     }
   ],
   "subsection_analysis": [
     {
       "document": "document.pdf",
       "refined_text": "Key extracted content...",
-      "page_number": 12,
-      "relevance_score": 0.87
+      "page_number": 12
     }
   ],
   "performance_metrics": {
-    "processing_time_seconds": 6.89,
-    "total_sections_extracted": 79,
-    "average_relevance_score": 0.413,
-    "documents_processed": 7
+    "processing_time_seconds": "evaluated_by_judges",
+    "total_sections_extracted": "variable_by_input",
+    "average_relevance_score": "calculated_dynamically",
+    "documents_processed": "depends_on_input"
   }
 }
 ```
@@ -191,19 +174,18 @@ Project-1b-copilot/                    # 👈 YOU ARE HERE (ROOT DIRECTORY)
 - **Team**: Individual Submission by Kanishka Pan
 - **Challenge**: Adobe Hackathon Round 1B - Document Intelligence
 - **Repository**: https://github.com/kanishkapan/Project-1b-copilot
-- **Final F1 Score**: 60% (Validated across multiple domains)
-- **Processing Speed**: 6-25 seconds (Well under 60s constraint)
+- **System Performance**: To be evaluated by Adobe judges
 
 ### **Adobe Challenge Requirements Met**
 | Requirement | Status | Evidence |
 |-------------|--------|----------|
 | **Theme**: "Connect What Matters — For the User Who Matters" | ✅ | Persona-driven intelligent extraction |
 | **System Type**: Intelligent document analyst | ✅ | Advanced NLP + relevance scoring |
-| **Input**: 3-10 PDFs + persona + job | ✅ | Handles 15+ documents efficiently |
+| **Input**: 3-10 PDFs + persona + job | ✅ | Handles multiple documents efficiently |
 | **Generic Solution**: Domain-agnostic | ✅ | Tested: Travel, Food, HR, Tech, Academic |
 | **CPU-Only**: No GPU dependencies | ✅ | Pure CPU execution verified |
-| **Model Size**: ≤ 1GB | ✅ | ~800MB total memory footprint |
-| **Processing Time**: ≤ 60 seconds | ✅ | 6-25s actual performance |
+| **Model Size**: ≤ 1GB | ✅ | Lightweight memory footprint |
+| **Processing Time**: ≤ 60 seconds | ✅ | System optimized for constraint compliance |
 | **Offline**: No internet access | ✅ | All models pre-downloaded |
 | **Output Format**: JSON specification | ✅ | Matches challenge specification exactly |
 
@@ -260,8 +242,8 @@ export DOC_INTELLIGENCE_TIMEOUT=60       # Processing timeout in seconds
 
 ### **1. Technical Excellence**
 - **Meets all constraints**: CPU-only, <1GB, <60s, offline
-- **Exceeds performance**: 60% F1 score with 6-25 second processing
 - **Advanced algorithms**: TF-IDF + semantic analysis + persona matching
+- **Robust architecture**: Production-ready document intelligence system
 
 ### **2. Universal Applicability** 
 - **Domain-agnostic design**: Works for any professional role
@@ -276,9 +258,9 @@ export DOC_INTELLIGENCE_TIMEOUT=60       # Processing timeout in seconds
 
 ### **4. Judge-Friendly Design**
 - **One-command setup**: Quick validation for busy judges
-- **Clear metrics**: Transparent performance reporting
+- **Clear documentation**: Comprehensive setup and usage guides
 - **Multiple test cases**: Included examples across domains
-- **Immediate results**: Fast processing with clear output
+- **Professional output**: Structured JSON results
 
 ---
 
