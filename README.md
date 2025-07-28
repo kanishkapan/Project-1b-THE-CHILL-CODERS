@@ -12,7 +12,7 @@
 ```bash
 # Complete Python setup and execution
 git clone https://github.com/kanishkapan/Project-1b-copilot.git
-cd Project-1b-copilot
+cd Project-1b-THE-CHILL-CODERS
 
 # Windows:
 python -m venv venv && venv\Scripts\activate && pip install -r requirements.txt && python -m spacy download en_core_web_sm && python main.py --input_json input_template.json
