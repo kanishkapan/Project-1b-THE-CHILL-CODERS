@@ -25,7 +25,7 @@ python3 -m venv venv && source venv/bin/activate && pip install -r requirements.
 ```bash
 # Complete Docker setup and execution
 git clone https://github.com/kanishkapan/Project-1b-copilot.git
-cd Project-1b-copilot
+cd Project-1b-THE-CHILL-CODERS
 
 # Build image (one-time setup)
 docker build -t doc-intelligence .
